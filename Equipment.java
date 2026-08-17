@@ -1,4 +1,5 @@
 public class Equipment {
+
     protected String name;
     protected int condition;
 
@@ -11,13 +12,11 @@ public class Equipment {
         System.out.println(name + " is operating.");
     }
 
-    // First repair method
     public void repair() {
         condition = 100;
         System.out.println(name + " has been fully repaired.");
     }
 
-    // Overloaded repair method
     public void repair(int amount) {
         condition = condition + amount;
 
@@ -25,6 +24,10 @@ public class Equipment {
             condition = 100;
         }
 
-        System.out.println(name + " condition: " + condition);
+        System.out.println(name + " condition: " + condition + "%");
+    }
+
+    public int getCondition() {
+        return condition;
     }
 }
