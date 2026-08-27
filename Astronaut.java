@@ -1,0 +1,76 @@
+public class Astronaut {
+
+    private String name;
+    private int health;
+    private int oxygen;
+    private int positionX;
+    private int positionY;
+    private boolean onMars;
+
+    public Astronaut(String name) {
+        this.name = name;
+        this.health = 100;
+        this.oxygen = 100;
+        this.positionX = 0;
+        this.positionY = 0;
+        this.onMars = false;
+    }
+
+    // Astronaut leaves the spaceship and steps onto Mars
+    public void exit() {
+        onMars = true;
+        System.out.println(name + " has exited the spaceship onto Mars.");
+    }
+
+    // Astronaut walks around and uses up oxygen
+    public void walk() {
+        if (onMars == false) {
+            System.out.println(name + " cannot walk, still inside the spaceship.");
+            return;
+        }
+
+        positionX = positionX + 1;
+        oxygen = oxygen - 5;
+
+        System.out.println(name + " walked to position " + positionX + ". Oxygen left: " + oxygen);
+
+        checkOxygen();
+    }
+
+    // Astronaut goes back inside the spaceship
+    public void returnToShip() {
+        onMars = false;
+        System.out.println(name + " has returned to the spaceship.");
+    }
+
+    // Astronaut boards the spaceship at the very start
+    public void board() {
+        System.out.println(name + " has boarded the spaceship.");
+    }
+
+    // If oxygen runs out, health starts dropping
+    private void checkOxygen() {
+        if (oxygen <= 0) {
+            oxygen = 0;
+            health = health - 10;
+            System.out.println("Warning! " + name + " is out of oxygen. Health is now " + health);
+        }
+    }
+
+    // This method will be overridden by Engineer and Photographer
+    public void performTask() {
+        System.out.println(name + " has no special task to perform.");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getOxygen() {
+        return oxygen;
+    }
+}

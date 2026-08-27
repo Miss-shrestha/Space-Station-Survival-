@@ -2,6 +2,10 @@ public class Equipment {
 
     protected String name;
     protected int condition;
+    
+        public String getName() {
+        return name;
+    }
 
     public Equipment(String name) {
         this.name = name;
