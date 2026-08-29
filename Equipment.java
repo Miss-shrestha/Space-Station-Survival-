@@ -30,15 +30,4 @@ public class Equipment {
     public int getCondition() {
         return condition;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean needsRepair() {
-        if (condition < 50) {
-            return true;
-        }
-        return false;
-    }
 }
