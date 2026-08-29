@@ -29,6 +29,16 @@ public class Station {
         }
     }
 
+    public ArrayList<Equipment> getBrokenEquipment() {
+        ArrayList<Equipment> broken = new ArrayList<Equipment>();
+        for (Equipment item : equipmentList) {
+            if (item.needsRepair()) {
+                broken.add(item);
+            }
+        }
+        return broken;
+    }
+
     public ArrayList<Equipment> getEquipmentList() {
         return equipmentList;
     }
