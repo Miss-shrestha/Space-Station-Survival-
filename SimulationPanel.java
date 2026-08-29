@@ -34,5 +34,6 @@ public class SimulationPanel extends JPanel {
             g.drawString(item.getName() + ": " + item.getCondition() + "%", 260, textY);
             textY = textY + 20;
         }
+        
     }
 }
