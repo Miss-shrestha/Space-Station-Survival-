@@ -23,7 +23,7 @@ public class Astronaut {
     }
 
     // Astronaut walks around and uses up oxygen
-    public void walk() {
+    public void walk() throws AstronautDownException {
         if (onMars == false) {
             System.out.println(name + " cannot walk, still inside the spaceship.");
             return;
@@ -48,12 +48,17 @@ public class Astronaut {
         System.out.println(name + " has boarded the spaceship.");
     }
 
-    // If oxygen runs out, health starts dropping
-    private void checkOxygen() {
+    // If oxygen runs out, health starts dropping. If health reaches 0, the
+    // astronaut is down and a custom exception is thrown.
+    private void checkOxygen() throws AstronautDownException {
         if (oxygen <= 0) {
             oxygen = 0;
             health = health - 10;
             System.out.println("Warning! " + name + " is out of oxygen. Health is now " + health);
+        }
+
+        if (health <= 0) {
+            throw new AstronautDownException(name + " has run out of health and is down!");
         }
     }
 

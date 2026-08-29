@@ -16,7 +16,13 @@ public class AstronautTest {
             Astronaut astronaut = crew.get(i);
             astronaut.board();
             astronaut.exit();
-            astronaut.walk();
+
+            try {
+                astronaut.walk();
+            } catch (AstronautDownException e) {
+                System.out.println("MISSION ALERT: " + e.getMessage());
+            }
+
             astronaut.performTask();
         }
     }
