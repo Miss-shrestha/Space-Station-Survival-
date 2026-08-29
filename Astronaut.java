@@ -1,3 +1,33 @@
+private void checkOxygen() throws AstronautDownException {
+    if (oxygen <= 0) {
+        oxygen = 0;
+        health = health - 10;
+
+        if (health < 0) {
+            health = 0;
+        }
+
+        System.out.println("Warning! " + name + " is out of oxygen. Health is now " + health);
+    }
+
+    if (health <= 0) {
+        throw new AstronautDownException(name + " has run out of health and is down!");
+    }
+}
+
+Commit message:
+
+Prevent health from going below 0
+
+Full checklist status after this fix: ✅ All 8 tasks in your role are now genuinely, fully complete.
+
+This also strengthens your worksheet — you can honestly add to 2.1 (Astronaut's description): "Also ensures oxygen and health never drop below 0, keeping the simulation's values realistic." Want me to fold this into the worksheet answers now?
+
+give me full code
+
+Here's the complete, current Astronaut.java — copy and replace the whole file:
+
+java
 public class Astronaut {
 
     private String name;
@@ -54,4 +84,34 @@ public class Astronaut {
     private void checkOxygen() throws AstronautDownException {
         if (oxygen <= 0) {
             oxygen = 0;
-            health = health -
+            health = health - 10;
+
+            if (health < 0) {
+                health = 0;
+            }
+
+            System.out.println("Warning! " + name + " is out of oxygen. Health is now " + health);
+        }
+
+        if (health <= 0) {
+            throw new AstronautDownException(name + " has run out of health and is down!");
+        }
+    }
+
+    // This method will be overridden by Engineer and Photographer
+    public void performTask() {
+        System.out.println(name + " has no special task to perform.");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getOxygen() {
+        return oxygen;
+    }
+}
