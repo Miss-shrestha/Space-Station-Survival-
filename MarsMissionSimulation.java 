@@ -1,0 +1,778 @@
+
+Screenshot 2026-08-30 at 13.29.02.png
+tell me what nimesh did so far
+
+Today 5:53 PM
+Screenshot 2026-08-30 at 17.51.18.png
+make this a bit in medium size and give me the whole code
+
+Screenshot 2026-08-30 at 17.55.38.png
+work on this same, adding rocket and astronaut..  // MARS MISSION SIMULATION
+// Scene 1: Earth Launch Base
+
+float cloudA = -180;
+float cloudB = 330;
+float cloudC = 760;
+
+float wind = 0.5;
+float windClock = 0;
+
+
+void setup() {
+  size(1100, 700);
+  smooth(8);
+}
+
+
+void draw() {
+  updateWorld();
+
+  drawSky();
+  drawSun();
+
+  drawCloud(cloudA, 125, 1.0);
+  drawCloud(cloudB, 205, 0.62);
+  drawCloud(cloudC, 105, 0.82);
+
+  drawLandscape();
+  drawFence();
+  drawRoad();
+  drawControlRoom();
+  drawLaunchTower();
+  drawLaunchPad();
+  drawWindSock();
+  drawGrass();
+  drawInterface();
+}
+
+
+// =====================================
+// UPDATE ENVIRONMENT
+// =====================================
+
+void updateWorld() {
+  windClock = windClock + 0.008;
+
+  wind = map(noise(windClock), 0, 1, 0.25, 1.35);
+
+  cloudA = cloudA + 0.45 * wind;
+  cloudB = cloudB + 0.28 * wind;
+  cloudC = cloudC + 0.36 * wind;
+
+  if (cloudA > width + 170) {
+    cloudA = -200;
+  }
+
+  if (cloudB > width + 150) {
+    cloudB = -180;
+  }
+
+  if (cloudC > width + 170) {
+    cloudC = -210;
+  }
+}
+
+
+// =====================================
+// SKY
+// =====================================
+
+void drawSky() {
+  for (int y = 0; y < 500; y++) {
+    float amount = map(y, 0, 500, 0, 1);
+
+    color topSky = color(32, 145, 225);
+    color bottomSky = color(183, 224, 247);
+
+    stroke(lerpColor(topSky, bottomSky, amount));
+    line(0, y, width, y);
+  }
+
+  noStroke();
+}
+
+
+// =====================================
+// SUN
+// =====================================
+
+void drawSun() {
+  noStroke();
+
+  for (int diameter = 150; diameter > 70; diameter -= 15) {
+    fill(255, 220, 80, 8);
+    ellipse(920, 100, diameter, diameter);
+  }
+
+  fill(255, 222, 74);
+  ellipse(920, 100, 68, 68);
+}
+
+
+// =====================================
+// CLOUDS
+// =====================================
+
+void drawCloud(float x, float y, float cloudSize) {
+  noStroke();
+
+  // Cloud shadow
+  fill(170, 205, 220, 55);
+  ellipse(x + 5, y + 13, 150 * cloudSize, 44 * cloudSize);
+
+  // White cloud sections
+  fill(255, 250);
+
+  ellipse(x, y, 130 * cloudSize, 45 * cloudSize);
+
+  ellipse(
+    x - 45 * cloudSize,
+    y + 8 * cloudSize,
+    75 * cloudSize,
+    40 * cloudSize
+  );
+
+  ellipse(
+    x + 45 * cloudSize,
+    y + 7 * cloudSize,
+    80 * cloudSize,
+    42 * cloudSize
+  );
+
+  ellipse(
+    x - 18 * cloudSize,
+    y - 23 * cloudSize,
+    73 * cloudSize,
+    65 * cloudSize
+  );
+
+  ellipse(
+    x + 28 * cloudSize,
+    y - 16 * cloudSize,
+    66 * cloudSize,
+    55 * cloudSize
+  );
+}
+
+
+// =====================================
+// LANDSCAPE
+// =====================================
+
+void drawLandscape() {
+  noStroke();
+
+  // Mountains
+  fill(92, 155, 130);
+
+  beginShape();
+
+  vertex(0, 430);
+  vertex(150, 325);
+  vertex(275, 430);
+  vertex(430, 290);
+  vertex(610, 430);
+  vertex(800, 310);
+  vertex(1100, 430);
+  vertex(1100, 520);
+  vertex(0, 520);
+
+  endShape(CLOSE);
+
+  // Green hills
+  fill(75, 176, 99);
+
+  ellipse(130, 480, 440, 175);
+  ellipse(520, 490, 570, 165);
+  ellipse(960, 475, 510, 180);
+
+  // Main grass field
+  fill(39, 151, 73);
+  rect(0, 455, width, 245);
+
+  // Lighter grass area
+  fill(51, 166, 78);
+  rect(0, 455, width, 42);
+
+  // Background trees
+  for (int x = 25; x < width; x += 75) {
+    float treeY = 450 + int(noise(x) * 25);
+
+    drawTree(x, treeY, 0.55);
+  }
+}
+
+
+// =====================================
+// TREES
+// =====================================
+
+void drawTree(float x, float y, float treeSize) {
+  noStroke();
+
+  // Tree trunk
+  fill(90, 65, 40);
+
+  rect(
+    x - 4 * treeSize,
+    y,
+    8 * treeSize,
+    35 * treeSize
+  );
+
+  // Dark leaves
+  fill(25, 112, 58);
+
+  ellipse(
+    x,
+    y - 8 * treeSize,
+    48 * treeSize,
+    55 * treeSize
+  );
+
+  // Light leaves
+  fill(42, 143, 69);
+
+  ellipse(
+    x - 12 * treeSize,
+    y + 2 * treeSize,
+    33 * treeSize,
+    38 * treeSize
+  );
+}
+
+
+// =====================================
+// SECURITY FENCE
+// =====================================
+
+void drawFence() {
+  stroke(180, 190, 190);
+  strokeWeight(2);
+
+  for (int x = 0; x < width; x += 45) {
+    line(x, 480, x, 535);
+  }
+
+  line(0, 492, width, 492);
+  line(0, 520, width, 520);
+
+  noStroke();
+}
+
+
+// =====================================
+// SERVICE ROAD
+// =====================================
+
+void drawRoad() {
+  noStroke();
+
+  fill(74, 80, 84);
+
+  quad(
+    0, 625,
+    0, 700,
+    455, 700,
+    505, 560
+  );
+
+  // Yellow road line
+  stroke(245, 206, 55);
+  strokeWeight(5);
+  line(20, 670, 432, 670);
+
+  noStroke();
+}
+
+
+// =====================================
+// SQUARE CONTROL ROOM
+// =====================================
+
+void drawControlRoom() {
+  noStroke();
+
+  // Building shadow
+  fill(25, 80, 55, 70);
+  ellipse(185, 628, 275, 32);
+
+  // Main square building
+  fill(225, 232, 230);
+  rect(58, 505, 265, 120, 7);
+
+  // Thick flat roof
+  fill(54, 68, 76);
+  rect(48, 490, 285, 30, 6);
+
+  // Orange safety line
+  fill(243, 151, 37);
+  rect(48, 515, 285, 7);
+
+  // Control Room name
+  fill(255);
+  textAlign(LEFT, CENTER);
+  textSize(16);
+  text("CONTROL ROOM", 72, 505);
+
+  // Three observation windows
+  for (int x = 78; x <= 202; x += 62) {
+    fill(50, 145, 190);
+    rect(x, 545, 48, 42, 4);
+
+    // Window reflection
+    fill(148, 215, 238, 140);
+
+    triangle(
+      x + 4, 549,
+      x + 23, 549,
+      x + 4, 568
+    );
+  }
+
+  // Entrance door
+  fill(55, 70, 78);
+  rect(267, 543, 39, 82, 4, 4, 0, 0);
+
+  // Door handle
+  fill(235, 190, 70);
+  ellipse(296, 584, 5, 5);
+
+  // Front step
+  fill(125, 132, 134);
+  rect(258, 620, 57, 7, 2);
+
+  // Roof equipment
+  fill(125, 134, 138);
+  rect(82, 477, 62, 13, 3);
+
+  // Antenna pole
+  stroke(70);
+  strokeWeight(3);
+  line(234, 490, 234, 455);
+
+  // Antenna receiver
+  noFill();
+  arc(234, 458, 42, 27, PI, TWO_PI);
+
+  // Red antenna light
+  noStroke();
+  fill(235, 55, 48);
+  ellipse(234, 450, 8, 8);
+
+  noStroke();
+}
+
+
+// =====================================
+// LAUNCH TOWER
+// =====================================
+
+void drawLaunchTower() {
+  stroke(72, 78, 83);
+  strokeWeight(7);
+
+  // Tower supports
+  line(745, 515, 745, 245);
+  line(815, 515, 815, 245);
+
+  // Cross supports
+  strokeWeight(3);
+
+  for (int y = 265; y < 510; y += 38) {
+    line(745, y, 815, y + 38);
+    line(815, y, 745, y + 38);
+    line(745, y, 815, y);
+  }
+
+  // Tower top
+  fill(92, 99, 104);
+  noStroke();
+  rect(733, 230, 94, 22, 3);
+
+  // Yellow safety strip
+  fill(245, 170, 35);
+  rect(733, 230, 94, 6, 3);
+
+  // Blinking warning lights
+  if ((frameCount / 30) % 2 == 0) {
+    fill(255, 55, 45);
+  } else {
+    fill(115, 25, 20);
+  }
+
+  ellipse(744, 225, 9, 9);
+  ellipse(816, 225, 9, 9);
+}
+
+
+// =====================================
+// LAUNCH PLATFORM
+// =====================================
+
+void drawLaunchPad() {
+  noStroke();
+
+  // Platform shadow
+  fill(40, 95, 60, 75);
+  ellipse(790, 640, 460, 55);
+
+  // Concrete platform
+  fill(96, 102, 107);
+
+  quad(
+    595, 550,
+    960, 550,
+    1050, 700,
+    500, 700
+  );
+
+  // Outer launch circle
+  fill(172, 179, 182);
+  ellipse(780, 557, 330, 78);
+
+  // Inner launch circle
+  fill(75, 81, 86);
+  ellipse(780, 557, 250, 49);
+
+  // Yellow safety circle
+  noFill();
+  stroke(247, 198, 42);
+  strokeWeight(6);
+  ellipse(780, 557, 290, 64);
+
+  noStroke();
+}
+
+
+// =====================================
+// WINDSOCK
+// =====================================
+
+void drawWindSock() {
+  float windMovement = wind * 18;
+
+  // Windsock pole
+  stroke(75);
+  strokeWeight(5);
+
+  line(390, 560, 390, 440);
+  line(390, 440, 406, 440);
+
+  noStroke();
+
+  // Orange section
+  fill(245, 90, 45);
+
+  quad(
+    405, 433,
+    455 + windMovement, 440,
+    455 + windMovement, 455,
+    405, 449
+  );
+
+  // White stripe
+  fill(255);
+
+  quad(
+    422, 436,
+    437, 438,
+    437, 453,
+    422, 451
+  );
+}
+
+
+// =====================================
+// MOVING GRASS
+// =====================================
+
+void drawGrass() {
+  strokeWeight(2);
+
+  for (int x = 3; x < width; x += 8) {
+
+    // Avoid drawing grass on the launch platform
+    if (x > 480) {
+      continue;
+    }
+
+    float grassHeight =
+      10 + noise(x * 0.08) * 18;
+
+    float grassMovement =
+      sin(frameCount * 0.04 + x * 0.05) * 5 * wind;
+
+    // Dark grass blade
+    stroke(16, 111, 49);
+
+    line(
+      x,
+      695,
+      x + grassMovement,
+      695 - grassHeight
+    );
+
+    // Light grass blade
+    stroke(87, 203, 90);
+
+    line(
+      x + 3,
+      700,
+      x + 3 + grassMovement,
+      700 - grassHeight * 0.75
+    );
+  }
+
+  noStroke();
+}
+
+
+// =====================================
+// GAME INFORMATION
+// =====================================
+
+void drawInterface() {
+  // Main title
+  fill(14, 43, 64, 215);
+  rect(22, 20, 355, 70, 12);
+
+  fill(255);
+  textAlign(LEFT, CENTER);
+  textSize(26);
+  text("EARTH LAUNCH COMPLEX", 43, 48);
+
+  fill(115, 225, 170);
+  textSize(12);
+  text("MARS MISSION - SYSTEMS ONLINE", 45, 75);
+
+  // Wind information
+  fill(14, 43, 64, 205);
+  rect(875, 625, 200, 52, 10);
+
+  fill(255);
+  textSize(13);
+  text("WIND", 892, 644);
+
+  // Wind strength bar
+  fill(130, 220, 255);
+  rect(940, 638, wind * 72, 10, 5);
+
+  fill(195, 225, 235);
+  text("Launch conditions monitored", 892, 662);
+}.    this is the code
+
+now can you make this code vs code
+
+Yes. I can convert it from Processing into standard Java Swing so it runs in VS Code without Processing.
+
+Before I give the code, choose where you want it:
+
+Separate project: one new MarsMissionSimulation.java file that runs independently. Easiest and safest.
+
+COMP2000 project: convert it into your existing MainFile.java, SimulationPanel.java, SpaceMission.java, and MissionState.java.
+
+The second option is better if this design will become your COMP2000 submission, but it must be integrated carefully so it does not overwrite your teammates’ work.
+
+
+ok
+
+Which version do you want?
+
+Separate one-file VS Code project
+
+Add it to your existing COMP2000 project
+
+I recommend the existing COMP2000 project if this is the final design your team will submit.
+
+
+seperate
+
+Here is the standalone VS Code Java version:
+
+MarsMissionSimulation.java
+
+To run it:
+
+Create/open a separate folder in VS Code.
+
+Place MarsMissionSimulation.java inside it.
+
+Open the VS Code terminal.
+
+Run:
+
+javac MarsMissionSimulation.java
+java MarsMissionSimulation
+Controls:
+
+Enter — astronaut boards and rocket launches
+
+R — restart the simulation
+
+It uses standard Java Swing only—Processing is not required.
+
+
+MarsMissionSimulation.java
+Code
+
+
+Library
+/
+MarsMissionSimulation.java
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.RenderingHints;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+public class MarsMissionSimulation extends JPanel {
+    private static final int READY = 0;
+    private static final int BOARDING = 1;
+    private static final int COUNTDOWN = 2;
+    private static final int LAUNCHING = 3;
+    private static final int LAUNCHED = 4;
+
+    private double cloudA = -180;
+    private double cloudB = 330;
+    private double cloudC = 760;
+    private double wind = 0.5;
+    private double windClock = 0;
+
+    private int missionStage = READY;
+    private int missionTimer = 0;
+    private double rocketX = 780;
+    private double rocketY = 550;
+    private double astronautX = 360;
+    private double astronautY = 610;
+    private boolean astronautVisible = true;
+
+    public MarsMissionSimulation() {
+        setFocusable(true);
+        setBackground(new Color(32, 145, 225));
+
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent event) {
+                if (event.getKeyCode() == KeyEvent.VK_ENTER && missionStage == READY) {
+                    missionStage = BOARDING;
+                }
+                if (event.getKeyCode() == KeyEvent.VK_R) {
+                    restartMission();
+                }
+            }
+        });
+
+        Timer timer = new Timer(16, event -> {
+            updateWorld();
+            updateMission();
+            repaint();
+        });
+        timer.start();
+    }
+
+    private void updateWorld() {
+        windClock += 0.008;
+        wind = 0.25 + ((Math.sin(windClock) + 1) / 2.0) * 1.10;
+
+        cloudA += 0.45 * wind;
+        cloudB += 0.28 * wind;
+        cloudC += 0.36 * wind;
+
+        if (cloudA > 1270) cloudA = -200;
+        if (cloudB > 1250) cloudB = -180;
+        if (cloudC > 1270) cloudC = -210;
+    }
+
+    private void updateMission() {
+        if (missionStage == BOARDING) {
+            astronautX += 1.8;
+            astronautY += (565 - astronautY) * 0.015;
+            if (astronautX >= 670) {
