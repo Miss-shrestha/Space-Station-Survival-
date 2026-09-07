@@ -16,13 +16,11 @@ public class Astronaut {
         this.onMars = false;
     }
 
-    // Astronaut leaves the spaceship and steps onto Mars
     public void exit() {
         onMars = true;
         System.out.println(name + " has exited the spaceship onto Mars.");
     }
 
-    // Astronaut walks around and uses up oxygen
     public void walk() throws AstronautDownException {
         if (onMars == false) {
             System.out.println(name + " cannot walk, still inside the spaceship.");
@@ -32,28 +30,26 @@ public class Astronaut {
         positionX = positionX + 1;
         oxygen = oxygen - 5;
 
+        if (oxygen < 0) {
+            oxygen = 0;
+        }
+
         System.out.println(name + " walked to position " + positionX + ". Oxygen left: " + oxygen);
 
         checkOxygen();
     }
 
-    // Astronaut goes back inside the spaceship
     public void returnToShip() {
         onMars = false;
         System.out.println(name + " has returned to the spaceship.");
     }
 
-    // Astronaut boards the spaceship at the very start
     public void board() {
         System.out.println(name + " has boarded the spaceship.");
     }
 
-    // If oxygen runs out, health starts dropping. Oxygen and health are both
-    // kept from going below 0. If health reaches 0, the astronaut is down
-    // and a custom exception is thrown.
     private void checkOxygen() throws AstronautDownException {
         if (oxygen <= 0) {
-            oxygen = 0;
             health = health - 10;
 
             if (health < 0) {
@@ -68,7 +64,6 @@ public class Astronaut {
         }
     }
 
-    // This method will be overridden by Engineer and Photographer
     public void performTask() {
         System.out.println(name + " has no special task to perform.");
     }

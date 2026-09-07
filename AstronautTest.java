@@ -12,6 +12,7 @@ public class AstronautTest {
         crew.add(eng);
         crew.add(photo);
 
+        System.out.println("=== Normal walk ===");
         for (int i = 0; i < crew.size(); i++) {
             Astronaut astronaut = crew.get(i);
             astronaut.board();
@@ -24,6 +25,20 @@ public class AstronautTest {
             }
 
             astronaut.performTask();
+        }
+
+        System.out.println("\n=== Demo: walking until health runs out ===");
+        Photographer explorer = new Photographer("Jordan");
+        explorer.board();
+        explorer.exit();
+
+        for (int i = 0; i < 30; i++) {
+            try {
+                explorer.walk();
+            } catch (AstronautDownException e) {
+                System.out.println("MISSION ALERT: " + e.getMessage());
+                break;
+            }
         }
     }
 }
