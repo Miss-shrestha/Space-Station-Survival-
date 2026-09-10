@@ -32,6 +32,10 @@ public class Astronaut {
         positionX = positionX + 1;
         oxygen = oxygen - 5;
 
+        if (oxygen < 0) {
+            oxygen = 0;
+        }
+
         System.out.println(name + " walked to position " + positionX + ". Oxygen left: " + oxygen);
 
         checkOxygen();
@@ -53,7 +57,6 @@ public class Astronaut {
     // and a custom exception is thrown.
     private void checkOxygen() throws AstronautDownException {
         if (oxygen <= 0) {
-            oxygen = 0;
             health = health - 10;
 
             if (health < 0) {
