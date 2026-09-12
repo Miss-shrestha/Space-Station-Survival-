@@ -1,7 +1,7 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Random;
+import javax.swing.*;
 
 public class SpaceMissionGame extends JPanel implements ActionListener, KeyListener {
     private final Timer timer = new Timer(16, this);
@@ -203,8 +203,8 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.setColor(new Color(36, 150, 72));
         g.fillRect(0, 455, 1100, 245);
 
-        drawControlRoom(g);
         drawFence(g);
+        drawControlRoom(g);
         drawLaunchPad(g);
         drawLaunchTower(g);
 
