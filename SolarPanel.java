@@ -6,6 +6,7 @@ public class SolarPanel extends Equipment {
 
     @Override
     public void operate() {
+        checkWorking();
         System.out.println(name + " is generating energy.");
     }
 }

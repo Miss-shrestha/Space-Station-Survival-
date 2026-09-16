@@ -9,6 +9,7 @@ public class Equipment {
     }
 
     public void operate() {
+        checkWorking();
         System.out.println(name + " is operating.");
     }
 
@@ -25,6 +26,28 @@ public class Equipment {
         }
 
         System.out.println(name + " condition: " + condition + "%");
+    }
+
+    public void damage(int amount) {
+        if (amount > 0) {
+            condition -= amount;
+
+            if (condition < 0) {
+                condition = 0;
+            }
+        }
+
+        System.out.println(name + " condition: " + condition + "%");
+    }
+
+    public boolean isWorking() {
+        return condition > 0;
+    }
+
+    protected void checkWorking() {
+        if (!isWorking()) {
+            throw new MissionException(name + " is damaged and cannot operate.");
+        }
     }
 
     public int getCondition() {
