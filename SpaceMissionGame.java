@@ -18,6 +18,11 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private Engineer engineer;
     private Photographer photographer;
     private int activeIndex = 0;
+
+    // Mars surface: State pattern context plus bookkeeping
+    private final SurfaceWalker walker = new SurfaceWalker();
+    private boolean reachedMars = false;
+    private int marsStepTimer = 0;
     private SolarPanel panel = new SolarPanel();
     private int walkTimer = 0;
 
@@ -28,6 +33,8 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private static final int SPACE = 4;
     private static final int WIN = 5;
     private static final int LOSE = 6;
+    private static final int MARS = 7;
+    private static final int FLAG_X = 1000;
 
     private int stage = READY;
     private int stageTimer = 0;
@@ -128,9 +135,12 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             }
         } else if (stage == SPACE) {
             updateSpaceMission();
+        } else if (stage == MARS) {
+            updateMars();
         }
 
-        if ((fuel <= 0 || oxygen <= 0 || energy <= 0 || equipment <= 0)
+        boolean fuelOut = fuel <= 0 && stage != MARS;   // fuel no longer matters once landed
+        if ((fuelOut || oxygen <= 0 || energy <= 0 || equipment <= 0)
                 && stage != WIN && stage != READY) {
             stage = LOSE;
             message = "MISSION FAILED - Press N to restart";
@@ -155,15 +165,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         walkTimer++;
         if (walkTimer >= 90) {
             walkTimer = 0;
-            try {
-                for (Astronaut member : crew) {
-                    member.walk();
-                }
-                oxygen = activeAstronaut().getOxygen();
-            } catch (AstronautDownException e) {
-                stage = LOSE;
-                message = "MISSION FAILED - " + e.getMessage();
-            }
+            tickOxygen();
         }
 
         if (!equipmentBroken && random.nextInt(2400) == 0) {
@@ -189,9 +191,46 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         }
 
         if (rocketX > 940) {
+            startMarsSurface();
+        }
+    }
+
+    private void tickOxygen() {
+        try {
+            for (Astronaut member : crew) {
+                member.walk();
+            }
+            oxygen = activeAstronaut().getOxygen();
+        } catch (AstronautDownException e) {
+            stage = LOSE;
+            message = "MISSION FAILED - " + e.getMessage();
+        }
+    }
+
+    private void startMarsSurface() {
+        stage = MARS;
+        reachedMars = true;
+        marsStepTimer = 0;
+        walker.reset();
+        message = "Landed on Mars! Walk to the flag. SPACE jumps (low gravity), P takes a photo";
+    }
+
+    private void updateMars() {
+        walker.update(left, right);
+
+        // Moving (walking or jumping) uses oxygen; standing still does not
+        if (walker.isMoving()) {
+            marsStepTimer++;
+            if (marsStepTimer >= 40) {
+                marsStepTimer = 0;
+                tickOxygen();
+            }
+        }
+
+        if (stage == MARS && walker.getX() >= FLAG_X - 20) {
             stage = WIN;
             score = (int)(fuel + oxygen + energy + equipment) + photographer.getPhotosTaken() * 5;
-            message = "MARS REACHED! Mission score: " + score;
+            message = "FLAG PLANTED! Mission score: " + score;
         }
     }
 
@@ -221,7 +260,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         Graphics2D g = (Graphics2D) graphics;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if (stage <= LAUNCHING) {
+        if (stage == MARS || (reachedMars && (stage == WIN || stage == LOSE))) {
+            drawMars(g);
+        } else if (stage <= LAUNCHING) {
             drawEarth(g);
         } else {
             drawSpace(g);
@@ -360,7 +401,8 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private void drawAstronaut(Graphics2D g, double x, double y) {
         int ax = (int)x;
         int ay = (int)y;
-        int walk = stage == BOARDING ? (int)(Math.sin(System.currentTimeMillis() * 0.012) * 7) : 0;
+        boolean swinging = stage == BOARDING || (stage == MARS && walker.isMoving());
+        int walk = swinging ? (int)(Math.sin(System.currentTimeMillis() * 0.012) * 7) : 0;
 
         // Backpack (drawn behind the body)
         g.setColor(new Color(210, 215, 218));
@@ -432,6 +474,48 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         }
     }
 
+    private void drawMars(Graphics2D g) {
+        GradientPaint sky = new GradientPaint(0, 0, new Color(70, 25, 30),
+                0, 520, new Color(220, 135, 95));
+        g.setPaint(sky);
+        g.fillRect(0, 0, 1100, 560);
+
+        g.setColor(new Color(255, 232, 195));
+        g.fillOval(860, 100, 56, 56);
+
+        g.setColor(new Color(150, 70, 45));
+        g.fillOval(-150, 430, 600, 190);
+        g.fillOval(330, 450, 720, 170);
+        g.setColor(new Color(178, 86, 52));
+        g.fillRect(0, 560, 1100, 140);
+
+        // the rocket that brought them here
+        drawRocket(g, 90, 585, false);
+
+        // fading footprints (opacity comes from each footprint's age)
+        for (Footprint f : walker.getFootprints()) {
+            int alpha = (int) (200 * f.getOpacity());
+            g.setColor(new Color(85, 38, 26, Math.max(0, Math.min(255, alpha))));
+            g.fillOval((int) f.getX() - 7, (int) f.getY(), 14, 5);
+        }
+
+        // flag
+        g.setColor(new Color(225, 228, 230));
+        g.setStroke(new BasicStroke(4));
+        g.drawLine(FLAG_X, 470, FLAG_X, 568);
+        g.setColor(new Color(210, 40, 45));
+        g.fillPolygon(new Polygon(new int[]{FLAG_X, FLAG_X + 55, FLAG_X},
+                new int[]{472, 495, 518}, 3));
+
+        drawAstronaut(g, walker.getX(), walker.getY());
+
+        if (stage == WIN) {
+            drawCentreMessage(g, "MISSION ACCOMPLISHED", "You planted the flag on Mars! Press N to play again");
+        } else if (stage == LOSE) {
+            drawCentreMessage(g, "MISSION FAILED", "A resource reached zero. Press N to retry");
+        }
+    }
+
     private void drawSpaceRocket(Graphics2D g, int x, int y) {
         g.setColor(new Color(225, 232, 235));
         g.fillOval(x - 35, y - 20, 75, 40);
@@ -463,9 +547,14 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.fillRoundRect(20, 640, 570, 42, 12, 12);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        String controls = stage < SPACE
-                ? "ENTER: Start     N: Restart"
-                : "ARROWS: Fly   Q: Switch   R: Repair   P: Photo   N: Restart";
+        String controls;
+        if (stage < SPACE) {
+            controls = "ENTER: Start     N: Restart";
+        } else if (stage == MARS || reachedMars) {
+            controls = "ARROWS: Walk   SPACE: Jump   Q: Switch   P: Photo   N: Restart";
+        } else {
+            controls = "ARROWS: Fly   Q: Switch   R: Repair   P: Photo   N: Restart";
+        }
         g.drawString(controls, 38, 666);
 
         drawCrewPanel(g);
@@ -478,8 +567,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.fillRoundRect(610, 640, 470, 42, 12, 12);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        String stateText = stage == MARS ? "   State: " + walker.getStateName() : "";
         g.drawString("Active: " + active.getName() + " (" + role + ")   Photos: "
-                + photographer.getPhotosTaken(), 628, 666);
+                + photographer.getPhotosTaken() + stateText, 628, 666);
     }
 
     private void drawBar(Graphics2D g, int x, int y, String label, double value, Color colour) {
@@ -524,6 +614,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         createCrew();
         panel = new SolarPanel();
         walkTimer = 0;
+        reachedMars = false;
+        marsStepTimer = 0;
+        walker.reset();
         resetAsteroids();
     }
 
@@ -535,6 +628,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         if (key == KeyEvent.VK_DOWN) down = true;
         if (key == KeyEvent.VK_LEFT) left = true;
         if (key == KeyEvent.VK_RIGHT) right = true;
+
+        // SPACE: jump on the Martian surface
+        if (key == KeyEvent.VK_SPACE && stage == MARS) walker.jump();
 
         // Q: switch which astronaut you control
         if (key == KeyEvent.VK_Q) {
@@ -559,15 +655,26 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         }
 
         // P: only the Photographer can take photos
-        if (key == KeyEvent.VK_P && stage == SPACE) {
+        if (key == KeyEvent.VK_P && (stage == SPACE || stage == MARS)) {
             if (activeAstronaut() != photographer) {
                 message = "Switch to " + photographer.getName() + " (Q) to take photos";
             } else if (energy >= 2) {
                 energy -= 2;
-                String subject = asteroids.stream()
-                        .anyMatch(a -> Math.abs(a.getX() - rocketX) < 250)
-                        ? "an asteroid field" : "deep space";
-                photographer.takePhoto(subject, (int) rocketX, (int) rocketY);
+                String subject;
+                int photoX;
+                int photoY;
+                if (stage == MARS) {
+                    subject = "the Martian surface";
+                    photoX = (int) walker.getX();
+                    photoY = (int) walker.getY();
+                } else {
+                    subject = asteroids.stream()
+                            .anyMatch(a -> Math.abs(a.getX() - rocketX) < 250)
+                            ? "an asteroid field" : "deep space";
+                    photoX = (int) rocketX;
+                    photoY = (int) rocketY;
+                }
+                photographer.takePhoto(subject, photoX, photoY);
                 message = photographer.getName() + " photographed " + subject
                         + " (photos: " + photographer.getPhotosTaken() + ")";
             } else {
