@@ -22,7 +22,7 @@ public class SpaceMissionGame extends JPanel
     private int stageTimer = 0;
     private int score = 0;
 
-    private double rocketX = 770;
+    private double rocketX = 775;
     private double rocketY = 545;
     private double astronautX = 350;
     private double astronautY = 610;
@@ -241,7 +241,7 @@ public class SpaceMissionGame extends JPanel
         if (rocketX > 940) {
             stage = MARS;
 
-            rocketX = 770;
+            rocketX = 775;
             rocketY = 545;
 
             up = false;
