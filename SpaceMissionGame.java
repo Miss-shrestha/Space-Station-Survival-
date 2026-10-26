@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class SpaceMissionGame extends JPanel implements ActionListener, KeyListener {
     private final Timer timer = new Timer(16, this);
@@ -10,7 +13,11 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     // Real Astronaut object from the astronaut system - the oxygen bar
     // below is now driven by this object's actual walk()/checkOxygen()
     // logic instead of a separate hardcoded number.
-    private Engineer astronaut = new Engineer("Alex");
+    // Crew: a generic list of Astronaut objects (Engineer and Photographer)
+    private final List<Astronaut> crew = new ArrayList<>();
+    private Engineer engineer;
+    private Photographer photographer;
+    private int activeIndex = 0;
     private SolarPanel panel = new SolarPanel();
     private int walkTimer = 0;
 
@@ -42,9 +49,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
 
     private final int[] starX = new int[90];
     private final int[] starY = new int[90];
-    private final int[] asteroidX = new int[7];
-    private final int[] asteroidY = new int[7];
-    private final int[] asteroidSize = new int[7];
+
+    // Generic list of Asteroid objects (replaces three parallel int arrays)
+    private final List<Asteroid> asteroids = new ArrayList<>();
 
     private double cloud1 = -100;
     private double cloud2 = 340;
@@ -60,6 +67,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             starY[i] = random.nextInt(700);
         }
 
+        createCrew();
         resetAsteroids();
         timer.start();
     }
@@ -97,7 +105,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             astronautY += (560 - astronautY) * 0.02;
             message = "Astronaut is boarding the rocket";
             if (astronautX >= 675) {
-                astronaut.board();
+                crew.forEach(Astronaut::board);
                 stage = COUNTDOWN;
                 stageTimer = 180;
             }
@@ -112,7 +120,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             rocketY -= 4.0;
             fuel -= 0.15;
             if (rocketY < -280) {
-                astronaut.exit();
+                crew.forEach(Astronaut::exit);
                 stage = SPACE;
                 rocketX = 120;
                 rocketY = 350;
@@ -148,8 +156,10 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         if (walkTimer >= 90) {
             walkTimer = 0;
             try {
-                astronaut.walk();
-                oxygen = astronaut.getOxygen();
+                for (Astronaut member : crew) {
+                    member.walk();
+                }
+                oxygen = activeAstronaut().getOxygen();
             } catch (AstronautDownException e) {
                 stage = LOSE;
                 message = "MISSION FAILED - " + e.getMessage();
@@ -162,35 +172,46 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             message = "Equipment failure! Press R to repair";
         }
 
-        for (int i = 0; i < asteroidX.length; i++) {
-            asteroidX[i] -= 2 + i % 3;
-            if (asteroidX[i] < -60) {
-                asteroidX[i] = 1120 + random.nextInt(400);
-                asteroidY[i] = 110 + random.nextInt(500);
-            }
+        // Lambda: move every asteroid
+        asteroids.forEach(a -> a.move(random));
 
-            double distance = Math.hypot(rocketX - asteroidX[i], rocketY - asteroidY[i]);
-            if (distance < asteroidSize[i] / 2.0 + 25) {
-                equipment -= 4;
-                energy -= 0.4;
-                asteroidX[i] = 1150 + random.nextInt(300);
-                equipmentBroken = true;
-                message = "Asteroid collision! Equipment damaged - Press R to repair";
-            }
+        // Stream: find every asteroid that is hitting the rocket
+        List<Asteroid> collided = asteroids.stream()
+                .filter(a -> a.hits(rocketX, rocketY))
+                .collect(Collectors.toList());
+
+        for (Asteroid a : collided) {
+            equipment -= 4;
+            energy -= 0.4;
+            a.respawn(1150, 300, random);
+            equipmentBroken = true;
+            message = "Asteroid collision! Equipment damaged - Press R to repair";
         }
 
         if (rocketX > 940) {
             stage = WIN;
-            score = (int)(fuel + oxygen + energy + equipment);
+            score = (int)(fuel + oxygen + energy + equipment) + photographer.getPhotosTaken() * 5;
             message = "MARS REACHED! Mission score: " + score;
         }
     }
 
+    private void createCrew() {
+        crew.clear();
+        engineer = new Engineer("Alex");
+        photographer = new Photographer("Sam");
+        crew.add(engineer);
+        crew.add(photographer);
+        activeIndex = 0;
+    }
+
+    private Astronaut activeAstronaut() {
+        return crew.get(activeIndex);
+    }
+
     private void resetAsteroids() {
-        for (int i = 0; i < asteroidX.length; i++) {
-            asteroidX[i] = 420 + i * 145 + random.nextInt(100);
-            asteroidY[i] = 120 + random.nextInt(500);
-            asteroidSize[i] = 30 + random.nextInt(35);
+        asteroids.clear();
+        for (int i = 0; i < 7; i++) {
+            asteroids.add(new Asteroid(i, random));
         }
     }
 
@@ -390,12 +411,14 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.fillOval(1000, 300, 48, 28);
         g.fillOval(1045, 390, 35, 24);
 
-        for (int i = 0; i < asteroidX.length; i++) {
-            int s = asteroidSize[i];
+        for (Asteroid a : asteroids) {
+            int s = a.getSize();
+            int ax = (int) a.getX();
+            int ay = (int) a.getY();
             g.setColor(new Color(115, 105, 100));
-            g.fillOval(asteroidX[i] - s / 2, asteroidY[i] - s / 2, s, s);
+            g.fillOval(ax - s / 2, ay - s / 2, s, s);
             g.setColor(new Color(75, 70, 68));
-            g.fillOval(asteroidX[i] - s / 5, asteroidY[i] - s / 5, s / 4, s / 5);
+            g.fillOval(ax - s / 5, ay - s / 5, s / 4, s / 5);
         }
 
         if (stage != WIN && stage != LOSE) {
@@ -437,13 +460,26 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         drawBar(g, 905, 35, "EQUIPMENT", equipment, new Color(205, 125, 230));
 
         g.setColor(new Color(10, 30, 48, 215));
-        g.fillRoundRect(20, 640, 470, 42, 12, 12);
+        g.fillRoundRect(20, 640, 570, 42, 12, 12);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.PLAIN, 13));
         String controls = stage < SPACE
                 ? "ENTER: Start     N: Restart"
-                : "ARROW KEYS: Fly     R: Repair     N: Restart";
+                : "ARROWS: Fly   Q: Switch   R: Repair   P: Photo   N: Restart";
         g.drawString(controls, 38, 666);
+
+        drawCrewPanel(g);
+    }
+
+    private void drawCrewPanel(Graphics2D g) {
+        Astronaut active = activeAstronaut();
+        String role = active == engineer ? "Engineer" : "Photographer";
+        g.setColor(new Color(10, 30, 48, 215));
+        g.fillRoundRect(610, 640, 470, 42, 12, 12);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        g.drawString("Active: " + active.getName() + " (" + role + ")   Photos: "
+                + photographer.getPhotosTaken(), 628, 666);
     }
 
     private void drawBar(Graphics2D g, int x, int y, String label, double value, Color colour) {
@@ -485,7 +521,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         equipment = 100;
         equipmentBroken = false;
         message = "Press ENTER to begin the Mars mission";
-        astronaut = new Engineer("Alex");
+        createCrew();
         panel = new SolarPanel();
         walkTimer = 0;
         resetAsteroids();
@@ -500,15 +536,42 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         if (key == KeyEvent.VK_LEFT) left = true;
         if (key == KeyEvent.VK_RIGHT) right = true;
 
+        // Q: switch which astronaut you control
+        if (key == KeyEvent.VK_Q) {
+            activeIndex = (activeIndex + 1) % crew.size();
+            oxygen = activeAstronaut().getOxygen();
+            message = "Now controlling " + activeAstronaut().getName();
+        }
+
+        // R: only the Engineer can repair
         if (key == KeyEvent.VK_R && stage == SPACE && equipmentBroken) {
-            if (energy >= 15) {
+            if (activeAstronaut() != engineer) {
+                message = "Switch to " + engineer.getName() + " (Q) to repair equipment";
+            } else if (energy >= 15) {
                 energy -= 15;
-                astronaut.repairEquipment(panel);
+                engineer.repairEquipment(panel);
                 equipment = panel.getCondition();
                 equipmentBroken = false;
-                message = astronaut.getName() + " repaired the " + panel.getClass().getSimpleName();
+                message = engineer.getName() + " repaired the " + panel.getClass().getSimpleName();
             } else {
                 message = "Not enough energy to repair equipment";
+            }
+        }
+
+        // P: only the Photographer can take photos
+        if (key == KeyEvent.VK_P && stage == SPACE) {
+            if (activeAstronaut() != photographer) {
+                message = "Switch to " + photographer.getName() + " (Q) to take photos";
+            } else if (energy >= 2) {
+                energy -= 2;
+                String subject = asteroids.stream()
+                        .anyMatch(a -> Math.abs(a.getX() - rocketX) < 250)
+                        ? "an asteroid field" : "deep space";
+                photographer.takePhoto(subject, (int) rocketX, (int) rocketY);
+                message = photographer.getName() + " photographed " + subject
+                        + " (photos: " + photographer.getPhotosTaken() + ")";
+            } else {
+                message = "Not enough energy to take a photo";
             }
         }
 
