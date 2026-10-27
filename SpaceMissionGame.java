@@ -24,7 +24,7 @@ public class SpaceMissionGame extends JPanel
 
     private double rocketX = 775;
     private double rocketY = 525;
-    private double astronautX = 350;
+    private double astronautX = 400;
     private double astronautY = 610;
 
     private double fuel = 100;
@@ -839,68 +839,107 @@ g.drawPolygon(nose);
     g.setStroke(new BasicStroke(1));
 }
 
-    private void drawAstronaut(
-            Graphics2D g,
-            double x,
-            double y
-    ) {
-        int ax = (int) x;
-        int ay = (int) y;
+   private void drawAstronaut(
+        Graphics2D g,
+        double x,
+        double y
+) {
+    int startX = (int) x;
+    int ay = (int) y;
 
-        int walk =
-                stage == BOARDING
-                        ? (int) (
-                        Math.sin(
-                                System.currentTimeMillis()
-                                        * 0.012
-                        ) * 7
-                )
-                        : 0;
+    int walk = stage == BOARDING
+            ? (int) (Math.sin(System.currentTimeMillis() * 0.012) * 4)
+            : 0;
 
-        g.setColor(new Color(245, 247, 248));
+    String[] names = {"Sky", "Rain"};
+    Color[] colours = {
+            new Color(0, 157, 220),
+            new Color(255, 85, 40)
+    };
 
-        g.fillRoundRect(
-                ax - 17,
-                ay - 48,
-                34,
-                55,
-                10,
-                10
-        );
+    for (int i = 0; i < 2; i++) {
+        int ax = startX + i * 62;
+        Color suitColour = colours[i];
 
-        g.fillOval(
-                ax - 23,
-                ay - 88,
-                46,
-                46
-        );
+        // Arms
+        g.setColor(new Color(245, 248, 250));
+        g.setStroke(new BasicStroke(
+                11,
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        ));
 
-        g.setColor(new Color(50, 150, 205));
+        if (i == 0) {
+            // Sky: outside arm and joined hand
+            g.drawLine(ax - 17, ay - 38, ax - 29, ay - 11);
+            g.drawLine(ax + 17, ay - 38, ax + 31, ay - 11);
+        } else {
+            // Rain: joined hand and outside arm
+            g.drawLine(ax - 17, ay - 38, ax - 31, ay - 11);
+            g.drawLine(ax + 17, ay - 38, ax + 29, ay - 11);
+        }
 
-        g.fillOval(
-                ax - 16,
-                ay - 80,
-                32,
-                25
-        );
+        // Spacesuit body
+        g.setColor(new Color(245, 248, 250));
+        g.fillRoundRect(ax - 22, ay - 50, 44, 58, 13, 13);
 
-        g.setColor(new Color(240, 243, 245));
-        g.setStroke(new BasicStroke(9));
+        // Helmet
+        g.fillOval(ax - 25, ay - 94, 50, 50);
 
-        g.drawLine(
-                ax - 8,
-                ay + 2,
-                ax - 15 + walk,
-                ay + 30
-        );
+        // Dark helmet frame
+        g.setColor(new Color(31, 51, 62));
+        g.fillOval(ax - 20, ay - 89, 40, 40);
 
-        g.drawLine(
-                ax + 8,
-                ay + 2,
-                ax + 15 - walk,
-                ay + 30
-        );
+        // Coloured visor
+        g.setColor(suitColour);
+        g.fillOval(ax - 15, ay - 84, 30, 30);
+
+        // Visor reflection
+        g.setColor(new Color(255, 255, 255, 165));
+        g.fillOval(ax - 11, ay - 81, 12, 7);
+
+        // Chest panel
+        g.setColor(new Color(44, 61, 72));
+        g.fillRoundRect(ax - 14, ay - 39, 28, 21, 5, 5);
+
+        // Coloured belt
+        g.setColor(suitColour);
+        g.fillRoundRect(ax - 19, ay - 8, 38, 11, 4, 4);
+
+       // Legs
+g.setColor(new Color(245, 248, 250));
+
+g.fillRoundRect(
+        ax - 18 + walk,
+        ay + 4,
+        13,
+        35,
+        8,
+        8
+);
+
+g.fillRoundRect(
+        ax + 5 - walk,
+        ay + 4,
+        13,
+        35,
+        8,
+        8
+);
+
+        // // Name centred on chest panel
+g.setColor(Color.WHITE);
+g.setFont(new Font("SansSerif", Font.BOLD, 9));
+FontMetrics nameMetrics = g.getFontMetrics();
+g.drawString(
+        names[i],
+        ax - nameMetrics.stringWidth(names[i]) / 2,
+        ay - 25
+);
     }
+
+    g.setStroke(new BasicStroke(1));
+}
 
     private void drawSpace(Graphics2D g) {
         GradientPaint galaxy =
@@ -1737,7 +1776,7 @@ g.drawPolygon(nose);
         rocketX = 770;
         rocketY = 545;
 
-        astronautX = 350;
+        astronautX = 400;
         astronautY = 610;
 
         fuel = 100;
