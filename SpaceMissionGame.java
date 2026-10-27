@@ -1524,9 +1524,9 @@ public class SpaceMissionGame extends JPanel
 
         g.fillRoundRect(
                 20,
-                640,
-                555,
-                42,
+                669,
+                310,
+                34,
                 12,
                 12
         );
@@ -1562,8 +1562,8 @@ public class SpaceMissionGame extends JPanel
 
         g.drawString(
                 controls,
-                38,
-                666
+                35,
+                692
         );
         g.translate(0, 14);
     }
