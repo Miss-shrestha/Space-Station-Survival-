@@ -23,7 +23,7 @@ public class SpaceMissionGame extends JPanel
     private int score = 0;
 
     private double rocketX = 775;
-    private double rocketY = 545;
+    private double rocketY = 525;
     private double astronautX = 350;
     private double astronautY = 610;
 
@@ -242,7 +242,7 @@ public class SpaceMissionGame extends JPanel
             stage = MARS;
 
             rocketX = 775; 
-            rocketY = 545;
+            rocketY = 525;
 
             up = false;
             down = false;
@@ -604,12 +604,13 @@ public class SpaceMissionGame extends JPanel
              x < 1100;
              x += 45) {
 
-            g.drawLine(x, 475, x, 535);
+            g.drawLine(x, 445, x, 535);
         }
 
-        g.drawLine(0, 490, 1100, 490);
-        g.drawLine(0, 520, 1100, 520);
-    }
+        g.drawLine(0, 460, 1100, 460);
+       g.drawLine(0, 490, 1100, 490);
+       g.drawLine(0, 520, 1100, 520);
+}
 
     private void drawLaunchPad(Graphics2D g) {
         g.setColor(new Color(92, 98, 103));
