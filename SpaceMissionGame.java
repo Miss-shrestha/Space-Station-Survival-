@@ -1563,7 +1563,7 @@ public class SpaceMissionGame extends JPanel
         g.drawString(
                 controls,
                 35,
-                6
+                690
         );
         g.translate(0, 14);
     }
