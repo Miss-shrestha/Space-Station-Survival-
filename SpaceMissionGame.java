@@ -1915,7 +1915,7 @@ if (marsLanded && marsExitTimer <= 0) {
         g.fillRoundRect(
                 20,
                 669,
-                310,
+                250,
                 34,
                 12,
                 12
