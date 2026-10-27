@@ -241,7 +241,7 @@ public class SpaceMissionGame extends JPanel
         if (rocketX > 940) {
             stage = MARS;
 
-            rocketX = 775;
+            rocketX = 775; 
             rocketY = 545;
 
             up = false;
@@ -402,90 +402,199 @@ public class SpaceMissionGame extends JPanel
     }
 
     private void drawControlRoom(Graphics2D g) {
-        g.setColor(new Color(225, 232, 230));
+    // Building shadow
+    g.setColor(new Color(18, 92, 67, 120));
+    g.fillRoundRect(
+            47,
+            500,
+            310,
+            142,
+            18,
+            18
+    );
 
+    // Main building
+    g.setColor(new Color(224, 238, 243));
+    g.fillRoundRect(
+            55,
+            500,
+            292,
+            133,
+            18,
+            18
+    );
+
+    // Blue line underneath the roof
+    g.setColor(new Color(0, 151, 206));
+    g.fillRect(
+            55,
+            515,
+            292,
+            14
+    );
+
+    // Main roof
+    g.setColor(new Color(30, 52, 65));
+    g.fillRoundRect(
+            43,
+            476,
+            316,
+            48,
+            15,
+            15
+    );
+
+    // Inner roof panel
+    g.setColor(new Color(22, 43, 56));
+    g.fillRoundRect(
+            50,
+            484,
+            302,
+            34,
+            9,
+            9
+    );
+
+    // Mission Control title
+    g.setColor(Color.WHITE);
+    g.setFont(
+            new Font(
+                    "SansSerif",
+                    Font.PLAIN,
+                    15
+            )
+    );
+
+    g.drawString(
+            "MISSION CONTROL",
+            68,
+            507
+    );
+
+    // Three computer screens
+    for (int i = 0; i < 3; i++) {
+        int screenX = 73 + i * 66;
+
+        // Dark screen frame
+        g.setColor(new Color(28, 55, 68));
         g.fillRoundRect(
-                55,
-                510,
-                270,
-                120,
-                10,
-                10
-        );
-
-        g.setColor(new Color(52, 67, 76));
-
-        g.fillRoundRect(
-                45,
-                490,
-                290,
-                35,
+                screenX,
+                541,
+                56,
+                52,
                 8,
                 8
         );
 
-        g.setColor(new Color(244, 153, 35));
-        g.fillRect(45, 518, 290, 7);
-
-        g.setColor(Color.WHITE);
-
-        g.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.BOLD,
-                        16
-                )
-        );
-
-        g.drawString(
-                "CONTROL ROOM",
-                68,
-                514
-        );
-
-        for (int x = 78;
-             x <= 202;
-             x += 62) {
-
-            g.setColor(
-                    new Color(48, 145, 190)
-            );
-
-            g.fillRoundRect(
-                    x,
-                    548,
-                    48,
-                    42,
-                    5,
-                    5
-            );
-
-            g.setColor(
-                    new Color(155, 220, 240)
-            );
-
-            g.drawLine(
-                    x + 8,
-                    551,
-                    x + 30,
-                    551
-            );
-        }
-
-        g.setColor(new Color(55, 70, 78));
-
+        // Blue screen
+        g.setColor(new Color(6, 168, 218));
         g.fillRoundRect(
-                270,
-                548,
-                38,
-                82,
+                screenX + 6,
+                547,
+                44,
+                39,
                 5,
                 5
         );
 
-        g.setColor(new Color(240, 190, 60));
-        g.fillOval(296, 587, 5, 5);
+        // Screen reflection
+        g.setColor(new Color(91, 210, 240));
+        g.fillRoundRect(
+                screenX + 11,
+                552,
+                28,
+                5,
+                3,
+                3
+        );
+
+        // Information lines
+        g.setColor(new Color(0, 98, 154));
+
+        g.fillRoundRect(
+                screenX + 11,
+                566,
+                35,
+                3,
+                2,
+                2
+        );
+
+        g.fillRoundRect(
+                screenX + 11,
+                575,
+                25,
+                3,
+                2,
+                2
+        );
     }
+
+    // Door frame
+    g.setColor(new Color(35, 61, 74));
+    g.fillRoundRect(
+            276,
+            537,
+            49,
+            96,
+            8,
+            8
+    );
+
+    // Door
+    g.setColor(new Color(67, 91, 103));
+    g.fillRoundRect(
+            283,
+            546,
+            35,
+            87,
+            6,
+            6
+    );
+
+    // Door handle
+    g.setColor(new Color(255, 191, 24));
+    g.fillOval(
+            307,
+            583,
+            7,
+            7
+    );
+
+    // Systems status panel
+    g.setColor(new Color(38, 67, 79));
+    g.fillRoundRect(
+            67,
+            603,
+            188,
+            24,
+            8,
+            8
+    );
+
+    // Status lights
+    g.setColor(new Color(29, 226, 143));
+    g.fillOval(80, 611, 8, 8);
+
+    g.setColor(new Color(255, 193, 26));
+    g.fillOval(95, 611, 8, 8);
+
+    g.setColor(new Color(255, 73, 64));
+    g.fillOval(110, 611, 8, 8);
+
+    // Systems Online text
+    g.setColor(new Color(203, 222, 230));
+    g.setFont(
+            new Font(
+                    "SansSerif",
+                    Font.PLAIN,
+                    9
+            )
+    );
+
+       g.drawString("SYSTEMS ONLINE", 129, 619);
+} // end of drawControlRoom
+
 
     private void drawFence(Graphics2D g) {
         g.setColor(new Color(190, 200, 200));
