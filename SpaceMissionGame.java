@@ -1480,7 +1480,7 @@ public class SpaceMissionGame extends JPanel
                 )
         );
 
-        g.drawString(message, 42, 72);
+       
 
         drawBar(
                 g,
@@ -1563,7 +1563,7 @@ public class SpaceMissionGame extends JPanel
         g.drawString(
                 controls,
                 35,
-                692
+                6
         );
         g.translate(0, 14);
     }
