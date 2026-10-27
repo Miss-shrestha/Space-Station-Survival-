@@ -664,135 +664,179 @@ public class SpaceMissionGame extends JPanel
     }
 
     private void drawRocket(
-            Graphics2D g,
-            double x,
-            double y,
-            boolean fire
-    ) {
-        int rx = (int) x;
-        int ry = (int) y;
+        Graphics2D g,
+        double x,
+        double y,
+        boolean fire
+) {
+    int rx = (int) x;
+    int ry = (int) y;
 
-        g.setColor(new Color(230, 235, 238));
+    g.setStroke(new BasicStroke(
+            2,
+            BasicStroke.CAP_ROUND,
+            BasicStroke.JOIN_ROUND
+    ));
 
-        g.fillRoundRect(
-                rx - 40,
-                ry - 220,
-                80,
-                210,
-                20,
-                20
-        );
+    // Animated rocket fire
+    if (fire) {
+        int movement = (int) (System.currentTimeMillis() / 80 % 14);
+        int flameLength;
 
-        Polygon nose =
-                new Polygon(
-                        new int[]{
-                                rx - 40,
-                                rx,
-                                rx + 40
-                        },
-                        new int[]{
-                                ry - 210,
-                                ry - 295,
-                                ry - 210
-                        },
-                        3
-                );
-
-        g.fillPolygon(nose);
-
-        g.setColor(new Color(45, 155, 210));
-
-        g.fillOval(
-                rx - 24,
-                ry - 175,
-                48,
-                48
-        );
-
-        g.setColor(new Color(195, 45, 50));
-
-        g.fillRect(
-                rx - 40,
-                ry - 65,
-                80,
-                27
-        );
-
-        g.fillPolygon(
-                new Polygon(
-                        new int[]{
-                                rx - 40,
-                                rx - 76,
-                                rx - 40
-                        },
-                        new int[]{
-                                ry - 70,
-                                ry,
-                                ry - 15
-                        },
-                        3
-                )
-        );
-
-        g.fillPolygon(
-                new Polygon(
-                        new int[]{
-                                rx + 40,
-                                rx + 76,
-                                rx + 40
-                        },
-                        new int[]{
-                                ry - 70,
-                                ry,
-                                ry - 15
-                        },
-                        3
-                )
-        );
-
-        if (fire) {
-            int flame =
-                    stage == LAUNCHING
-                            ? 135
-                            : 75;
-
-            g.setColor(new Color(255, 85, 15));
-
-            g.fillPolygon(
-                    new Polygon(
-                            new int[]{
-                                    rx - 30,
-                                    rx,
-                                    rx + 30
-                            },
-                            new int[]{
-                                    ry - 10,
-                                    ry + flame,
-                                    ry - 10
-                            },
-                            3
-                    )
-            );
-
-            g.setColor(new Color(255, 225, 70));
-
-            g.fillPolygon(
-                    new Polygon(
-                            new int[]{
-                                    rx - 14,
-                                    rx,
-                                    rx + 14
-                            },
-                            new int[]{
-                                    ry - 10,
-                                    ry + flame - 35,
-                                    ry - 10
-                            },
-                            3
-                    )
-            );
+        if (stage == LAUNCHING) {
+            flameLength = 125 + movement;
+        } else {
+            flameLength = 65 + movement;
         }
+
+        // Outer red flame
+        g.setColor(new Color(225, 45, 25));
+        g.fillPolygon(new Polygon(
+                new int[]{rx - 28, rx, rx + 28},
+                new int[]{ry + 15, ry + flameLength, ry + 15},
+                3
+        ));
+
+        // Orange flame
+        g.setColor(new Color(255, 135, 15));
+        g.fillPolygon(new Polygon(
+                new int[]{rx - 20, rx, rx + 20},
+                new int[]{ry + 13, ry + flameLength - 22, ry + 13},
+                3
+        ));
+
+        // Yellow centre
+        g.setColor(new Color(255, 230, 70));
+        g.fillPolygon(new Polygon(
+                new int[]{rx - 10, rx, rx + 10},
+                new int[]{ry + 12, ry + flameLength - 44, ry + 12},
+                3
+        ));
     }
+
+    // Engine nozzle
+    g.setColor(new Color(67, 82, 94));
+  g.fillRoundRect(rx - 30, ry - 12, 60, 28, 10, 10);
+
+    g.setColor(new Color(45, 58, 68));
+   g.drawRoundRect(rx - 30, ry - 12, 60, 28, 10, 10);
+
+
+    // Left fin
+    Polygon leftFin = new Polygon(
+            new int[]{rx - 37, rx - 66, rx - 37},
+            new int[]{ry - 105, ry + 5, ry - 20},
+            3
+    );
+
+    g.setColor(new Color(225, 0, 55));
+    g.fillPolygon(leftFin);
+
+ 
+
+g.setStroke(new BasicStroke(3));
+g.setColor(new Color(48, 61, 71));
+g.drawPolygon(leftFin);
+
+    // Right fin
+    Polygon rightFin = new Polygon(
+            new int[]{rx + 37, rx + 66, rx + 37},
+            new int[]{ry - 105, ry + 5, ry - 20},
+            3
+    );
+
+    g.setColor(new Color(225, 0, 55));
+    g.fillPolygon(rightFin);
+
+ 
+
+
+
+g.setStroke(new BasicStroke(3));
+g.setColor(new Color(48, 61, 71));
+g.drawPolygon(rightFin);
+
+    // Main rocket body
+    g.setColor(new Color(234, 241, 245));
+    g.fillRoundRect(rx - 38, ry - 230, 76, 225, 30, 30);
+
+    // Light highlight on the body
+    g.setColor(new Color(250, 253, 255, 150));
+    g.fillRoundRect(rx - 29, ry - 222, 20, 198, 16, 16);
+
+    // Body outline
+  
+
+
+
+g.setStroke(new BasicStroke(3));
+g.setColor(new Color(48, 61, 71));
+g.drawRoundRect(rx - 38, ry - 230, 76, 225, 30, 30);
+
+    // Pointed nose
+    Polygon nose = new Polygon(
+            new int[]{rx - 38, rx, rx + 38},
+            new int[]{ry - 225, ry - 320, ry - 225},
+            3
+    );
+
+    g.setColor(new Color(247, 250, 252));
+    g.fillPolygon(nose);
+
+
+
+
+
+g.setStroke(new BasicStroke(3));
+g.setColor(new Color(48, 61, 71));
+g.drawPolygon(nose);
+
+    // Red stripe
+    g.setColor(new Color(225, 0, 55));
+    g.fillRect(rx - 35, ry - 91, 70, 31);
+
+    // Window outer frame
+    g.setColor(new Color(16, 55, 76));
+    g.fillOval(rx - 32, ry - 196, 64, 64);
+
+    // Blue glass
+    g.setColor(new Color(0, 160, 215));
+    g.fillOval(rx - 25, ry - 189, 50, 50);
+
+    // Darker glass shading
+    g.setColor(new Color(0, 113, 183));
+   g.fillArc(rx - 25, ry - 189, 50, 50, 210, 150);
+
+    // Window reflection
+    g.setColor(new Color(190, 239, 253));
+    g.fillOval(rx - 18, ry - 183, 18, 13);
+
+    // Victory badge
+    
+    
+    
+    
+    
+    
+    g.setColor(new Color(0, 91, 172));
+  g.setFont(new Font("SansSerif", Font.BOLD, 12));
+    String rocketName = "VICTORY";
+    FontMetrics nameMetrics = g.getFontMetrics();
+
+    g.drawString(
+            rocketName,
+            rx - nameMetrics.stringWidth(rocketName) / 2,
+            ry - 104
+    );
+
+    // Small bolts near the engine
+    g.setColor(new Color(108, 128, 139));
+    g.fillOval(rx - 31, ry - 43, 5, 5);
+    g.fillOval(rx + 26, ry - 43, 5, 5);
+
+    // Restore normal stroke for the other drawings
+    g.setStroke(new BasicStroke(1));
+}
 
     private void drawAstronaut(
             Graphics2D g,
