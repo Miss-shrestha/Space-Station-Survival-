@@ -1441,6 +1441,7 @@ public class SpaceMissionGame extends JPanel
     }
 
     private void drawDashboard(Graphics2D g) {
+        g.translate(0, -14);
         g.setColor(
                 new Color(10, 30, 48, 225)
         );
@@ -1564,6 +1565,7 @@ public class SpaceMissionGame extends JPanel
                 38,
                 666
         );
+        g.translate(0, 14);
     }
 
     private void drawBar(
