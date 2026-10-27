@@ -4,49 +4,51 @@ public class AstronautTest {
 
     public static void main(String[] args) {
 
-        // Create an Engineer
-        Engineer alex = createEngineer("Alex");
+        // Create Sky as the Engineer
+        Engineer sky = createEngineer("Sky");
 
-        showAstronautInfo(alex);
-        moveTowardsRocket(alex);
-        boardRocket(alex);
-        engineerRepairsEquipment(alex);
+        showAstronautInfo(sky);
+        moveTowardsRocket(sky);
+        boardRocket(sky);
+        engineerRepairsEquipment(sky);
 
-        // Create a Photographer
-        Photographer sam = createPhotographer("Sam");
+        // Create Rain as the Photographer
+        Photographer rain = createPhotographer("Rain");
 
-        boardRocket(sam);
-        photographerPreparesCamera(sam);
+        showAstronautInfo(rain);
+        moveTowardsRocket(rain);
+        boardRocket(rain);
+        photographerPreparesCamera(rain);
 
-        // Generic ArrayList that stores different types of Astronauts
+        // Stores different astronaut subclasses together
         ArrayList<Astronaut> crew = new ArrayList<>();
 
-        crew.add(alex);
-        crew.add(sam);
+        crew.add(sky);
+        crew.add(rain);
 
-        System.out.println("\n=== Crew tasks ===");
+        System.out.println("\n=== Victory Crew Tasks ===");
 
-        // Polymorphism - each astronaut performs their own task
+        // Polymorphism: each astronaut performs their own task
         for (Astronaut astronaut : crew) {
             astronaut.performTask();
         }
     }
 
-    // Creates a new Engineer astronaut
+    // Creates an Engineer astronaut
     public static Engineer createEngineer(String name) {
-        System.out.println("=== Creating an astronaut ===");
+        System.out.println("\n=== Creating Engineer ===");
         return new Engineer(name);
     }
 
-    // Creates a new Photographer astronaut
+    // Creates a Photographer astronaut
     public static Photographer createPhotographer(String name) {
-        System.out.println("=== Creating an astronaut ===");
+        System.out.println("\n=== Creating Photographer ===");
         return new Photographer(name);
     }
 
-    // Shows an astronaut's information
+    // Displays an astronaut's current information
     public static void showAstronautInfo(Astronaut astronaut) {
-        System.out.println("\n=== Astronaut details ===");
+        System.out.println("\n=== Astronaut Details ===");
         System.out.println("Name: " + astronaut.getName());
         System.out.println("Health: " + astronaut.getHealth());
         System.out.println("Oxygen: " + astronaut.getOxygen());
@@ -54,33 +56,33 @@ public class AstronautTest {
 
     // Moves an astronaut towards the rocket
     public static void moveTowardsRocket(Astronaut astronaut) {
-        System.out.println("\n=== Moving towards the rocket ===");
+        System.out.println("\n=== Moving Towards the Rocket ===");
         System.out.println(
-            astronaut.getName() + " is walking towards the rocket."
+                astronaut.getName()
+                        + " is walking towards the Victory rocket."
         );
     }
 
-    // Astronaut boards the rocket
+    // Boards an astronaut onto the rocket
     public static void boardRocket(Astronaut astronaut) {
-        System.out.println("\n=== Boarding the rocket ===");
+        System.out.println("\n=== Boarding the Rocket ===");
         astronaut.board();
     }
 
-    // Engineer repairs equipment
+    // Sky repairs the solar panel
     public static void engineerRepairsEquipment(Engineer engineer) {
-        System.out.println("\n=== Engineer repairing equipment ===");
+        System.out.println("\n=== Engineer Repairing Equipment ===");
 
         SolarPanel panel = new SolarPanel();
-
         engineer.repairEquipment(panel);
     }
 
-    // Photographer performs their special task
+    // Rain prepares the camera and completes the photography task
     public static void photographerPreparesCamera(
             Photographer photographer) {
 
         System.out.println(
-            "\n=== Photographer preparing the camera ==="
+                "\n=== Photographer Preparing the Camera ==="
         );
 
         photographer.performTask();
