@@ -44,9 +44,9 @@ public class SpaceMissionGame extends JPanel
     private final int[] starX = new int[90];
     private final int[] starY = new int[90];
 
-    private final int[] asteroidX = new int[7];
-    private final int[] asteroidY = new int[7];
-    private final int[] asteroidSize = new int[7];
+    private final int[] asteroidX = new int[10];
+    private final int[] asteroidY = new int[10];
+    private final int[] asteroidSize = new int[10];
 
     private double cloud1 = -100;
     private double cloud2 = 340;
@@ -208,11 +208,10 @@ public class SpaceMissionGame extends JPanel
              i < asteroidX.length;
              i++) {
 
-            asteroidX[i] -= 2 + i % 3;
+           asteroidX[i] -= 5 + i % 4;
 
             if (asteroidX[i] < -60) {
-                asteroidX[i] =
-                        1120 + random.nextInt(400);
+               asteroidX[i] = 1100 + random.nextInt(180);
 
                 asteroidY[i] =
                         110 + random.nextInt(500);
@@ -230,8 +229,7 @@ public class SpaceMissionGame extends JPanel
                 equipment -= 0.8;
                 energy -= 0.4;
 
-                asteroidX[i] =
-                        1150 + random.nextInt(300);
+               asteroidX[i] = 1100 + random.nextInt(180);
 
                 message =
                         "Asteroid collision! Equipment damaged";
@@ -266,10 +264,7 @@ public class SpaceMissionGame extends JPanel
              i < asteroidX.length;
              i++) {
 
-            asteroidX[i] =
-                    420
-                            + i * 145
-                            + random.nextInt(100);
+            asteroidX[i] = 330 + i * 100 + random.nextInt(80);
 
             asteroidY[i] =
                     120 + random.nextInt(500);
@@ -942,90 +937,305 @@ g.drawString(
 }
 
     private void drawSpace(Graphics2D g) {
-        GradientPaint galaxy =
-                new GradientPaint(
-                        0,
-                        0,
-                        new Color(2, 5, 18),
-                        0,
-                        700,
-                        new Color(8, 29, 68)
-                );
+    // Dark blue and black galaxy background
+    GradientPaint galaxy = new GradientPaint(
+            0, 0, new Color(2, 5, 18),
+            1100, 700, new Color(7, 31, 73)
+    );
+    g.setPaint(galaxy);
+    g.fillRect(0, 0, 1100, 700);
 
-        g.setPaint(galaxy);
-        g.fillRect(0, 0, 1100, 700);
 
-        for (int i = 0;
-             i < starX.length;
-             i++) {
-
-            if (i % 7 == 0) {
-                g.setColor(
-                        new Color(115, 205, 255)
-                );
-            } else {
-                g.setColor(Color.WHITE);
-            }
-
-            int size = 1 + i % 3;
-
-            g.fillOval(
-                    starX[i],
-                    starY[i],
-                    size,
-                    size
-            );
+    // Stars
+    for (int i = 0; i < starX.length; i++) {
+        if (i % 7 == 0) {
+            g.setColor(new Color(80, 210, 255));
+        } else {
+            g.setColor(Color.WHITE);
         }
 
-        drawMarsDestination(g);
-
-        for (int i = 0;
-             i < asteroidX.length;
-             i++) {
-
-            int size = asteroidSize[i];
-
-            g.setColor(
-                    new Color(115, 105, 100)
-            );
-
-            g.fillOval(
-                    asteroidX[i] - size / 2,
-                    asteroidY[i] - size / 2,
-                    size,
-                    size
-            );
-
-            g.setColor(
-                    new Color(75, 70, 68)
-            );
-
-            g.fillOval(
-                    asteroidX[i] - size / 5,
-                    asteroidY[i] - size / 5,
-                    size / 4,
-                    size / 5
-            );
-        }
-
-        if (stage != WIN
-                && stage != LOSE) {
-
-            drawSpaceRocket(
-                    g,
-                    (int) rocketX,
-                    (int) rocketY
-            );
-        }
-
-        if (stage == LOSE) {
-            drawCentreMessage(
-                    g,
-                    "MISSION FAILED",
-                    "A resource reached zero. Press N to retry"
-            );
-        }
+        int size = 1 + i % 3;
+        g.fillOval(starX[i], starY[i], size, size);
     }
+
+    // Rotation value for both planets
+    double spin = System.currentTimeMillis() * 0.0015;
+
+    // Blue planet
+    int bluePlanetX = 165;
+    int bluePlanetY = 190;
+
+   // Blue atmospheric glow
+g.setColor(new Color(40, 190, 255, 55));
+g.fillOval(bluePlanetX - 45, bluePlanetY - 45, 90, 90);
+
+// Shaded blue planet
+RadialGradientPaint bluePlanetPaint = new RadialGradientPaint(
+        bluePlanetX - 12,
+        bluePlanetY - 15,
+        55,
+        new float[]{0.0f, 0.65f, 1.0f},
+        new Color[]{
+                new Color(75, 220, 255),
+                new Color(0, 145, 220),
+                new Color(0, 55, 135)
+        }
+);
+g.setPaint(bluePlanetPaint);
+g.fillOval(bluePlanetX - 37, bluePlanetY - 37, 74, 74);
+
+    g.setColor(new Color(35, 225, 175));
+    g.fillOval(
+            bluePlanetX + (int) (Math.cos(spin) * 19) - 8,
+            bluePlanetY + (int) (Math.sin(spin) * 10) - 5,
+            16,
+            10
+    );
+    g.fillOval(
+            bluePlanetX + (int) (Math.cos(spin + 2.5) * 22) - 6,
+            bluePlanetY + (int) (Math.sin(spin + 2.5) * 13) - 4,
+            12,
+            8
+    );
+
+    g.setColor(new Color(80, 200, 255));
+    g.setStroke(new BasicStroke(2));
+    g.drawOval(bluePlanetX - 37, bluePlanetY - 37, 74, 74);
+
+    // Purple atmospheric glow
+    // Detailed rotating purple planet
+int purplePlanetX = 695;
+int purplePlanetY = 205;
+
+// Outer glow layers
+g.setColor(new Color(125, 55, 210, 25));
+g.fillOval(
+        purplePlanetX - 54,
+        purplePlanetY - 54,
+        108,
+        108
+);
+
+g.setColor(new Color(190, 90, 255, 40));
+g.fillOval(
+        purplePlanetX - 45,
+        purplePlanetY - 45,
+        90,
+        90
+);
+
+// Back section of the ring
+Graphics2D backRing = (Graphics2D) g.create();
+backRing.rotate(-0.38, purplePlanetX, purplePlanetY);
+backRing.setColor(new Color(150, 90, 35));
+backRing.setStroke(new BasicStroke(
+        10,
+        BasicStroke.CAP_ROUND,
+        BasicStroke.JOIN_ROUND
+));
+backRing.drawArc(
+        purplePlanetX - 55,
+        purplePlanetY - 19,
+        110,
+        38,
+        0,
+        180
+);
+backRing.dispose();
+
+// Shaded planet body
+RadialGradientPaint purplePlanetPaint =
+        new RadialGradientPaint(
+                purplePlanetX - 13,
+                purplePlanetY - 15,
+                48,
+                new float[]{0.0f, 0.55f, 1.0f},
+                new Color[]{
+                        new Color(245, 145, 255),
+                        new Color(158, 65, 225),
+                        new Color(55, 22, 115)
+                }
+        );
+
+g.setPaint(purplePlanetPaint);
+g.fillOval(
+        purplePlanetX - 32,
+        purplePlanetY - 32,
+        64,
+        64
+);
+
+// Curved atmospheric bands
+g.setColor(new Color(255, 185, 245, 100));
+g.setStroke(new BasicStroke(4));
+g.drawArc(
+        purplePlanetX - 25,
+        purplePlanetY - 18,
+        50,
+        25,
+        195,
+        145
+);
+
+g.setColor(new Color(75, 25, 145, 120));
+g.drawArc(
+        purplePlanetX - 26,
+        purplePlanetY - 3,
+        52,
+        23,
+        20,
+        145
+);
+
+// Rotating surface markings
+int purpleSpotX =
+        purplePlanetX + (int) (Math.cos(-spin) * 17);
+
+int purpleSpotY =
+        purplePlanetY + (int) (Math.sin(-spin) * 9);
+
+g.setColor(new Color(255, 175, 235, 190));
+g.fillOval(
+        purpleSpotX - 7,
+        purpleSpotY - 5,
+        14,
+        10
+);
+
+int smallSpotX =
+        purplePlanetX + (int) (Math.cos(-spin + 2.5) * 20);
+
+int smallSpotY =
+        purplePlanetY + (int) (Math.sin(-spin + 2.5) * 12);
+
+g.setColor(new Color(95, 35, 165, 170));
+g.fillOval(
+        smallSpotX - 4,
+        smallSpotY - 3,
+        8,
+        6
+);
+
+// Bright front section of the ring
+Graphics2D frontRing = (Graphics2D) g.create();
+frontRing.rotate(-0.38, purplePlanetX, purplePlanetY);
+frontRing.setColor(new Color(245, 165, 45));
+frontRing.setStroke(new BasicStroke(
+        8,
+        BasicStroke.CAP_ROUND,
+        BasicStroke.JOIN_ROUND
+));
+frontRing.drawArc(
+        purplePlanetX - 55,
+        purplePlanetY - 19,
+        110,
+        38,
+        180,
+        180
+);
+frontRing.dispose();
+
+// Thin atmospheric outline
+g.setColor(new Color(220, 145, 255, 170));
+g.setStroke(new BasicStroke(2));
+g.drawOval(
+        purplePlanetX - 32,
+        purplePlanetY - 32,
+        64,
+        64
+);
+
+g.setStroke(new BasicStroke(1));
+
+    // Mars destination
+    drawMarsDestination(g);
+
+    // Asteroids with different shapes
+    for (int i = 0; i < asteroidX.length; i++) {
+        int size = asteroidSize[i];
+        int centreX = asteroidX[i];
+        int centreY = asteroidY[i];
+
+        if (i % 3 == 0) {
+            // Jagged asteroid
+            int[] xPoints = {
+                    centreX - size / 2,
+                    centreX - size / 5,
+                    centreX + size / 4,
+                    centreX + size / 2,
+                    centreX + size / 3,
+                    centreX,
+                    centreX - size / 3
+            };
+
+            int[] yPoints = {
+                    centreY,
+                    centreY - size / 2,
+                    centreY - size / 3,
+                    centreY,
+                    centreY + size / 3,
+                    centreY + size / 2,
+                    centreY + size / 3
+            };
+
+            g.setColor(new Color(125, 105, 105));
+            g.fillPolygon(xPoints, yPoints, xPoints.length);
+
+        } else if (i % 3 == 1) {
+            // Round asteroid
+            g.setColor(new Color(105, 125, 145));
+            g.fillOval(
+                    centreX - size / 2,
+                    centreY - size / 2,
+                    size,
+                    size
+            );
+
+        } else {
+            // Triangular asteroid
+            g.setColor(new Color(130, 95, 150));
+            g.fillPolygon(new Polygon(
+                    new int[]{
+                            centreX,
+                            centreX - size / 2,
+                            centreX + size / 2
+                    },
+                    new int[]{
+                            centreY - size / 2,
+                            centreY + size / 2,
+                            centreY + size / 3
+                    },
+                    3
+            ));
+        }
+
+        // Asteroid crater
+        g.setColor(new Color(55, 65, 80, 180));
+        g.fillOval(
+                centreX - size / 7,
+                centreY - size / 7,
+                Math.max(5, size / 4),
+                Math.max(4, size / 5)
+        );
+    }
+
+    // Player rocket
+    if (stage != WIN && stage != LOSE) {
+        drawSpaceRocket(
+                g,
+                (int) rocketX,
+                (int) rocketY
+        );
+    }
+
+    if (stage == LOSE) {
+        drawCentreMessage(
+                g,
+                "MISSION FAILED",
+                "A resource reached zero. Press N to retry"
+        );
+    }
+}
 
     private void drawMarsDestination(Graphics2D g) {
         g.setColor(new Color(95, 30, 42, 90));
@@ -1043,64 +1253,80 @@ g.drawString(
     }
 
     private void drawSpaceRocket(
-            Graphics2D g,
-            int x,
-            int y
-    ) {
-        g.setColor(new Color(225, 232, 235));
+        Graphics2D g,
+        int x,
+        int y
+) {
+    // Outer flame
+    g.setColor(new Color(255, 100, 20));
+    g.fillPolygon(new Polygon(
+            new int[]{x - 34, x - 76, x - 34},
+            new int[]{y - 15, y, y + 15},
+            3
+    ));
 
-        g.fillOval(
-                x - 35,
-                y - 20,
-                75,
-                40
-        );
+    // Inner flame
+    g.setColor(new Color(255, 220, 55));
+    g.fillPolygon(new Polygon(
+            new int[]{x - 34, x - 62, x - 34},
+            new int[]{y - 8, y, y + 8},
+            3
+    ));
 
-        g.setColor(new Color(195, 45, 50));
+    // Upper fin
+    Polygon upperFin = new Polygon(
+            new int[]{x - 23, x - 48, x - 18},
+            new int[]{y - 17, y - 43, y - 9},
+            3
+    );
+    g.setColor(new Color(220, 35, 65));
+    g.fillPolygon(upperFin);
+    g.setColor(new Color(35, 52, 67));
+    g.setStroke(new BasicStroke(3));
+    g.drawPolygon(upperFin);
 
-        g.fillPolygon(
-                new Polygon(
-                        new int[]{
-                                x - 25,
-                                x - 50,
-                                x - 25
-                        },
-                        new int[]{
-                                y - 15,
-                                y - 35,
-                                y
-                        },
-                        3
-                )
-        );
+    // Lower fin
+    Polygon lowerFin = new Polygon(
+            new int[]{x - 23, x - 48, x - 18},
+            new int[]{y + 17, y + 43, y + 9},
+            3
+    );
+    g.setColor(new Color(220, 35, 65));
+    g.fillPolygon(lowerFin);
+    g.setColor(new Color(35, 52, 67));
+    g.drawPolygon(lowerFin);
 
-        g.setColor(new Color(55, 165, 215));
+    // Rocket body with pointed nose
+    Polygon body = new Polygon(
+            new int[]{x - 35, x + 25, x + 55, x + 25, x - 35},
+            new int[]{y - 21, y - 21, y, y + 21, y + 21},
+            5
+    );
 
-        g.fillOval(
-                x + 5,
-                y - 12,
-                22,
-                22
-        );
+    g.setColor(new Color(240, 246, 248));
+    g.fillPolygon(body);
+    g.setColor(new Color(35, 52, 67));
+    g.setStroke(new BasicStroke(3));
+    g.drawPolygon(body);
 
-        g.setColor(new Color(255, 155, 25));
+    // Red rear section
+    g.setColor(new Color(220, 35, 65));
+    g.fillRect(x - 35, y - 18, 12, 36);
 
-        g.fillPolygon(
-                new Polygon(
-                        new int[]{
-                                x - 35,
-                                x - 70,
-                                x - 35
-                        },
-                        new int[]{
-                                y - 11,
-                                y,
-                                y + 11
-                        },
-                        3
-                )
-        );
-    }
+    // Rocket window frame
+    g.setColor(new Color(26, 48, 62));
+    g.fillOval(x - 2, y - 17, 34, 34);
+
+    // Blue glass
+    g.setColor(new Color(0, 166, 220));
+    g.fillOval(x + 3, y - 12, 24, 24);
+
+    // Window reflection
+    g.setColor(new Color(215, 250, 255));
+    g.fillOval(x + 8, y - 9, 8, 7);
+
+    g.setStroke(new BasicStroke(1));
+}
 
     private void drawMars(Graphics2D g) {
         GradientPaint marsSky =
