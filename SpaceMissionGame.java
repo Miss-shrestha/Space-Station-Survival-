@@ -323,7 +323,7 @@ public class SpaceMissionGame extends JPanel
         g.fillRect(0, 0, 1100, 500);
 
         g.setColor(new Color(255, 220, 65));
-        g.fillOval(900, 60, 80, 80);
+        g.fillOval(900, 110, 80, 80);
 
         drawCloud(g, (int) cloud1, 115, 1.0);
         drawCloud(g, (int) cloud2, 185, 0.7);
