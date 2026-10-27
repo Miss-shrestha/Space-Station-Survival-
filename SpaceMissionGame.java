@@ -51,7 +51,10 @@ public class SpaceMissionGame extends JPanel
     private double cloud1 = -100;
     private double cloud2 = 340;
     private double cloud3 = 760;
-
+    private double marsRocketY = -280;
+private boolean marsLanded = false;
+private int marsExitTimer = 0;
+private double marsAstronautX = 750;
     public SpaceMissionGame() {
         setPreferredSize(new Dimension(1100, 700));
         setFocusable(true);
@@ -111,16 +114,20 @@ public class SpaceMissionGame extends JPanel
             cloud3 = -170;
         }
 
-        if (stage == BOARDING) {
-            astronautX += 2.2;
-            astronautY += (560 - astronautY) * 0.02;
+       if (stage == BOARDING) {
+    if (stageTimer > 0) {
+        stageTimer--;
+        message = "Sky and Rain are waving before boarding";
+    } else {
+        astronautX += 2.2;
+        astronautY += (560 - astronautY) * 0.02;
+        message = "Sky and Rain are boarding the rocket";
 
-            message = "Astronaut is boarding the rocket";
-
-            if (astronautX >= 675) {
-                stage = COUNTDOWN;
-                stageTimer = 180;
-            }
+        if (astronautX >= 675) {
+            stage = COUNTDOWN;
+            stageTimer = 180;
+        }
+    }
 
         } else if (stage == COUNTDOWN) {
             stageTimer--;
@@ -149,9 +156,12 @@ public class SpaceMissionGame extends JPanel
                         "Fly to Mars and avoid the asteroids";
             }
 
-        } else if (stage == SPACE) {
-            updateSpaceMission();
-        }
+       } else if (stage == SPACE) {
+    updateSpaceMission();
+
+} else if (stage == MARS) {
+    updateMarsLanding();
+}
 
         if ((fuel <= 0
                 || oxygen <= 0
@@ -166,7 +176,31 @@ public class SpaceMissionGame extends JPanel
                     "MISSION FAILED - Press N to restart";
         }
     }
+       private void updateMarsLanding() {
+    if (!marsLanded) {
+        marsRocketY += 5.0;
+        message = "Victory rocket is landing on Mars";
 
+        if (marsRocketY >= 545) {
+            marsRocketY = 545;
+            marsLanded = true;
+            marsExitTimer = 75;
+            message = "Landing successful";
+        }
+
+    } else if (marsExitTimer > 0) {
+        marsExitTimer--;
+        message = "Preparing Sky and Rain for Mars exploration";
+
+    } else if (marsAstronautX > 610) {
+        marsAstronautX -= 2.0;
+        message = "Sky and Rain are leaving the rocket";
+
+    } else {
+        marsAstronautX = 610;
+        message = "Victory Crew is ready to explore Mars";
+    }
+}
     private void updateSpaceMission() {
         double speed =
                 equipmentBroken ? 1.8 : 4.0;
@@ -238,6 +272,12 @@ public class SpaceMissionGame extends JPanel
 
         if (rocketX > 940) {
             stage = MARS;
+
+            marsRocketY = -280;
+marsLanded = false;
+marsExitTimer = 75;
+marsAstronautX = 750;
+message = "Approaching the Mars landing site";
 
             rocketX = 775; 
             rocketY = 525;
@@ -842,9 +882,13 @@ g.drawPolygon(nose);
     int startX = (int) x;
     int ay = (int) y;
 
-    int walk = stage == BOARDING
-            ? (int) (Math.sin(System.currentTimeMillis() * 0.012) * 4)
-            : 0;
+    int walk = stage == BOARDING && stageTimer <= 0
+        ? (int) (Math.sin(System.currentTimeMillis() * 0.012) * 4)
+        : 0;
+
+int wave = stage == BOARDING && stageTimer > 0
+        ? (int) (Math.sin(System.currentTimeMillis() * 0.018) * 7)
+        : 0;
 
     String[] names = {"Sky", "Rain"};
     Color[] colours = {
@@ -865,14 +909,27 @@ g.drawPolygon(nose);
         ));
 
         if (i == 0) {
-            // Sky: outside arm and joined hand
-            g.drawLine(ax - 17, ay - 38, ax - 29, ay - 11);
-            g.drawLine(ax + 17, ay - 38, ax + 31, ay - 11);
-        } else {
-            // Rain: joined hand and outside arm
-            g.drawLine(ax - 17, ay - 38, ax - 31, ay - 11);
-            g.drawLine(ax + 17, ay - 38, ax + 29, ay - 11);
-        }
+    // Sky waves only the outside left hand
+    if (stage == BOARDING && stageTimer > 0) {
+        g.drawLine(ax - 17, ay - 38, ax - 32 + wave, ay - 70);
+    } else {
+        g.drawLine(ax - 17, ay - 38, ax - 29, ay - 11);
+    }
+
+    // Sky's inside hand stays joined
+    g.drawLine(ax + 17, ay - 38, ax + 31, ay - 11);
+
+} else {
+    // Rain's inside hand stays joined
+    g.drawLine(ax - 17, ay - 38, ax - 31, ay - 11);
+
+    // Rain waves only the outside right hand
+    if (stage == BOARDING && stageTimer > 0) {
+        g.drawLine(ax + 17, ay - 38, ax + 32 + wave, ay - 70);
+    } else {
+        g.drawLine(ax + 17, ay - 38, ax + 29, ay - 11);
+    }
+}
 
         // Spacesuit body
         g.setColor(new Color(245, 248, 250));
@@ -1411,34 +1468,57 @@ g.setStroke(new BasicStroke(1));
 
         drawMarsLandingPlatform(g);
 
-        drawRocket(
-                g,
-                770,
-                545,
-                false
-        );
+        // Rocket descends onto the Mars landing platform
+drawRocket(
+        g,
+        770,
+        marsRocketY,
+        !marsLanded
+);
 
-        drawMarsInformation(g);
+// Astronauts appear only after landing and a short pause
+if (marsLanded && marsExitTimer <= 0) {
+    drawAstronaut(
+            g,
+            marsAstronautX,
+            610
+    );
+}
+
+        
     }
 
-    private void drawMarsMoons(Graphics2D g) {
-        g.setColor(new Color(205, 181, 165));
-        g.fillOval(860, 135, 55, 42);
+   private void drawMarsMoons(Graphics2D g) {
+    // Large moon with a soft glow
+    g.setColor(new Color(255, 205, 150, 25));
+    g.fillOval(845, 110, 105, 105);
 
-        g.setColor(new Color(121, 91, 88));
-        g.fillOval(871, 144, 25, 19);
+    g.setColor(new Color(226, 190, 165));
+    g.fillOval(860, 125, 75, 75);
 
-        g.setColor(
-                new Color(235, 211, 194, 120)
-        );
-        g.fillOval(868, 140, 13, 9);
+    g.setColor(new Color(245, 218, 194));
+    g.fillOval(870, 134, 28, 16);
 
-        g.setColor(new Color(172, 143, 134));
-        g.fillOval(970, 205, 32, 25);
+    g.setColor(new Color(164, 116, 108));
+    g.fillOval(887, 151, 28, 20);
 
-        g.setColor(new Color(103, 73, 72));
-        g.fillOval(979, 212, 13, 10);
-    }
+    // Small distant planet
+    g.setColor(new Color(115, 170, 185, 28));
+    g.fillOval(963, 212, 62, 62);
+
+    g.setColor(new Color(125, 177, 188));
+    g.fillOval(975, 224, 38, 38);
+
+    g.setColor(new Color(78, 123, 139));
+    g.fillArc(978, 233, 32, 19, 180, 180);
+
+    // Thin ring around the distant planet
+    g.setColor(new Color(205, 190, 160, 170));
+    g.setStroke(new BasicStroke(2));
+    g.drawOval(967, 237, 54, 14);
+
+    g.setStroke(new BasicStroke(1));
+}
 
     private void drawMarsMountains(Graphics2D g) {
         Polygon backMountains =
@@ -2029,11 +2109,13 @@ g.setStroke(new BasicStroke(1));
         int pressedKey =
                 event.getKeyCode();
 
-        if (pressedKey == KeyEvent.VK_ENTER
-                && stage == READY) {
+       if (pressedKey == KeyEvent.VK_ENTER
+        && stage == READY) {
 
-            stage = BOARDING;
-        }
+    stage = BOARDING;
+    stageTimer = 100;
+    message = "Sky and Rain are waving before boarding";
+}
 
         if (pressedKey == KeyEvent.VK_UP) {
             up = true;
