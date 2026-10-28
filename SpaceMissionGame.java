@@ -2137,13 +2137,13 @@ public class SpaceMissionGame extends JPanel
         if (pressedKey == KeyEvent.VK_R && stage == SPACE) {
 
             if (activeAstronaut() != engineer) {
-                message = "Switch to Sky (Q) to repair equipment";
+                message = "Press Q to select Sky (Engineer)";
 
-            } else if (equipment >= 100 && !equipmentBroken) {
+            } else if (equipment >= 100) {
                 message = "Equipment is already fully repaired";
 
             } else if (energy < 15) {
-                message = "Not enough energy to repair equipment";
+                message = "Not enough energy to repair";
 
             } else {
                 energy -= 15;
@@ -2151,13 +2151,12 @@ public class SpaceMissionGame extends JPanel
                 engineer.repairEquipment(panel);
 
                 equipment = Math.min(100, equipment + 35);
-                equipmentBroken = false;
+                equipmentBroken = equipment <= 0;
 
-                message = "Sky repaired the equipment! Equipment: "
+                message = "Repair successful! Equipment: "
                         + (int) equipment + "%";
             }
         }
-
         // P: only the Photographer can take photos
         if (pressedKey == KeyEvent.VK_P
                 && (stage == SPACE || stage == EXPLORE)) {
