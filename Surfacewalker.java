@@ -8,12 +8,14 @@ public class SurfaceWalker {
     public static final double WALK_SPEED = 2.5;
     public static final double LOW_GRAVITY = 0.12;   // Earth-like would be about 0.5
     public static final double JUMP_SPEED = 5.5;
-    public static final double GROUND_Y = 524;       // drawing anchor so the boots touch the ground
+    public static final double GROUND_Y = 610;       // drawing anchor so the boots touch the ground
+    public static final double FLAG_REACHED_X = 975; // the crew wins when the walker gets this far
 
     private static final double MIN_X = 40;
-    private static final double MAX_X = 1040;
+    private static final double MAX_X = 985;
     private static final double STEP_LENGTH = 28;
-    private static final double START_X = 200;
+    private static final double START_X = 610;
+    private static final double PARTNER_OFFSET = 62;   // Rain walks beside Sky
 
     private final MovementState standing = new StandingState();
     private final MovementState walking = new WalkingState();
@@ -54,7 +56,9 @@ public class SurfaceWalker {
         distanceSinceStep += distance;
         if (distanceSinceStep >= STEP_LENGTH) {
             distanceSinceStep = 0;
-            footprints.add(new Footprint(x, y + 36 + (leftFoot ? 4 : 12)));
+            double footY = y + 39 + (leftFoot ? 4 : 12);
+            footprints.add(new Footprint(x, footY));                    // Sky
+            footprints.add(new Footprint(x + PARTNER_OFFSET, footY));   // Rain
             leftFoot = !leftFoot;
         }
     }
