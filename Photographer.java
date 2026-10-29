@@ -1,20 +1,36 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Photographer extends Astronaut {
 
-    private int photosTaken;
+    // Generic list: only Photo objects can be stored here
+    private final List<Photo> photos = new ArrayList<>();
 
     public Photographer(String name) {
         super(name);
-        photosTaken = 0;
+    }
+
+    // Take a photo of something at a position and store it
+    public Photo takePhoto(String subject, int x, int y) {
+        Photo photo = new Photo(getName(), subject, x, y);
+        photos.add(photo);
+        System.out.println(getName() + " took a photo of " + subject + ". Total photos: " + photos.size());
+        return photo;
     }
 
     // Photographers override performTask to take photos instead
     @Override
     public void performTask() {
-        photosTaken = photosTaken + 1;
-        System.out.println(getName() + " took a photo. Total photos: " + photosTaken);
+        takePhoto("the Martian horizon", 0, 0);
     }
 
     public int getPhotosTaken() {
-        return photosTaken;
+        return photos.size();
+    }
+
+    // Read-only view so other classes cannot change the stored photos
+    public List<Photo> getPhotos() {
+        return Collections.unmodifiableList(photos);
     }
 }
