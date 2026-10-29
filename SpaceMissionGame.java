@@ -1018,51 +1018,185 @@ g.drawString(
     // Rotation value for both planets
     double spin = System.currentTimeMillis() * 0.0015;
 
-    // Blue planet
-    int bluePlanetX = 165;
-    int bluePlanetY = 190;
+    // Teal and gold rotating spiral galaxy
+int galaxyX = 750;
+int galaxyY = 205;
 
-   // Blue atmospheric glow
-g.setColor(new Color(40, 190, 255, 55));
-g.fillOval(bluePlanetX - 45, bluePlanetY - 45, 90, 90);
+// Soft outer glow
+RadialGradientPaint galaxyGlow =
+        new RadialGradientPaint(
+                galaxyX,
+                galaxyY,
+                75,
+                new float[]{0.0f, 0.45f, 1.0f},
+                new Color[]{
+                        new Color(255, 220, 110, 120),
+                        new Color(20, 190, 190, 65),
+                        new Color(0, 80, 110, 0)
+                }
+        );
 
-// Shaded blue planet
-RadialGradientPaint bluePlanetPaint = new RadialGradientPaint(
-        bluePlanetX - 12,
-        bluePlanetY - 15,
-        55,
-        new float[]{0.0f, 0.65f, 1.0f},
-        new Color[]{
-                new Color(75, 220, 255),
-                new Color(0, 145, 220),
-                new Color(0, 55, 135)
-        }
+g.setPaint(galaxyGlow);
+g.fillOval(
+        galaxyX - 75,
+        galaxyY - 75,
+        150,
+        150
 );
-g.setPaint(bluePlanetPaint);
-g.fillOval(bluePlanetX - 37, bluePlanetY - 37, 74, 74);
 
-    g.setColor(new Color(35, 225, 175));
-    g.fillOval(
-            bluePlanetX + (int) (Math.cos(spin) * 19) - 8,
-            bluePlanetY + (int) (Math.sin(spin) * 10) - 5,
-            16,
-            10
-    );
-    g.fillOval(
-            bluePlanetX + (int) (Math.cos(spin + 2.5) * 22) - 6,
-            bluePlanetY + (int) (Math.sin(spin + 2.5) * 13) - 4,
-            12,
-            8
-    );
+// Rotating spiral arms
+Graphics2D spiralGraphics =
+        (Graphics2D) g.create();
 
-    g.setColor(new Color(80, 200, 255));
-    g.setStroke(new BasicStroke(2));
-    g.drawOval(bluePlanetX - 37, bluePlanetY - 37, 74, 74);
+spiralGraphics.rotate(
+        spin * 0.25,
+        galaxyX,
+        galaxyY
+);
+
+// Large turquoise arms
+spiralGraphics.setColor(
+        new Color(25, 205, 195, 165)
+);
+spiralGraphics.setStroke(
+        new BasicStroke(
+                10,
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        )
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 62,
+        galaxyY - 31,
+        124,
+        62,
+        15,
+        235
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 62,
+        galaxyY - 31,
+        124,
+        62,
+        195,
+        235
+);
+
+// Bright aqua middle arms
+spiralGraphics.setColor(
+        new Color(105, 245, 225, 195)
+);
+spiralGraphics.setStroke(
+        new BasicStroke(
+                7,
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        )
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 45,
+        galaxyY - 24,
+        90,
+        48,
+        30,
+        225
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 45,
+        galaxyY - 24,
+        90,
+        48,
+        210,
+        225
+);
+
+// Inner golden spiral
+spiralGraphics.setColor(
+        new Color(255, 196, 75, 220)
+);
+spiralGraphics.setStroke(
+        new BasicStroke(
+                5,
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        )
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 28,
+        galaxyY - 16,
+        56,
+        32,
+        35,
+        230
+);
+
+spiralGraphics.drawArc(
+        galaxyX - 28,
+        galaxyY - 16,
+        56,
+        32,
+        215,
+        230
+);
+
+spiralGraphics.dispose();
+
+// Glowing galaxy centre
+RadialGradientPaint galaxyCore =
+        new RadialGradientPaint(
+                galaxyX,
+                galaxyY,
+                25,
+                new float[]{0.0f, 0.45f, 1.0f},
+                new Color[]{
+                        new Color(255, 255, 235),
+                        new Color(255, 203, 90),
+                        new Color(20, 190, 180, 0)
+                }
+        );
+
+g.setPaint(galaxyCore);
+g.fillOval(
+        galaxyX - 25,
+        galaxyY - 25,
+        50,
+        50
+);
+
+// Small stars surrounding the galaxy
+int[][] galaxyStars = {
+        {-66, -25},
+        {-54, 39},
+        {-30, -58},
+        {18, -61},
+        {55, -35},
+        {67, 20},
+        {38, 54},
+        {-20, 65}
+};
+
+g.setColor(new Color(220, 255, 245));
+
+for (int[] star : galaxyStars) {
+    g.fillOval(
+            galaxyX + star[0],
+            galaxyY + star[1],
+            3,
+            3
+    );
+}
+
+g.setStroke(new BasicStroke(1));
 
     // Purple atmospheric glow
     // Detailed rotating purple planet
-int purplePlanetX = 695;
-int purplePlanetY = 205;
+int purplePlanetX = 140;
+int purplePlanetY = 460;
 
 // Outer glow layers
 g.setColor(new Color(125, 55, 210, 25));
@@ -1915,7 +2049,7 @@ if (marsLanded && marsExitTimer <= 0) {
         g.fillRoundRect(
                 45,
                 669,
-                210,
+                stage == SPACE ? 290 : 210,
                 34,
                 12,
                 12
