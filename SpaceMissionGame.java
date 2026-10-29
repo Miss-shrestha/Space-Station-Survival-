@@ -405,7 +405,7 @@ public class SpaceMissionGame extends JPanel
     }
 
     private void updateExploration() {
-        walker.update(left, right);
+        walker.update(up, down, left, right);
 
         // Moving (walking or jumping) uses oxygen; standing still does not
         if (walker.isMoving()) {
@@ -1851,78 +1851,34 @@ public class SpaceMissionGame extends JPanel
                 new Color(205, 125, 230)
         );
 
-        g.setColor(
-                new Color(10, 30, 48, 215)
-        );
-
-        g.fillRoundRect(
-                20,
-                669,
-                460,
-                34,
-                12,
-                12
-        );
-
-        g.setColor(Color.WHITE);
-
-        g.setFont(
-                new Font(
-                        "SansSerif",
-                        Font.PLAIN,
-                        13
-                )
-        );
-
-        String controls;
-
+        // Keep the galaxy clear of bottom instructions. On Mars, place compact
+        // controls below the top dashboard, away from feet, footprints and flag.
         if (stage < SPACE) {
-            controls =
-                    "ENTER: Start     N: Restart";
-
-        } else if (stage == SPACE) {
-            controls =
-                    "ARROWS: Fly   Q: Switch   R: Repair   P: Photo   N: Restart";
-
-        } else if (stage == EXPLORE) {
-            controls =
-                    "ARROWS: Walk   SPACE: Jump   Q: Switch   P: Photo   N: Restart";
-
-        } else if (stage == MARS) {
-            controls =
-                    "MARS LANDED     N: Restart";
-
-        } else {
-            controls =
-                    "N: Restart";
-        }
-
-        g.drawString(
-                controls,
-                35,
-                690
-        );
-
-        // Crew panel: who is active, photo count and (on Mars) movement state
-        if (stage >= SPACE) {
-            Astronaut active = activeAstronaut();
-            String role = active == engineer ? "Engineer" : "Photographer";
-            String stateText = stage == EXPLORE
-                    ? "   State: " + walker.getStateName()
-                    : "";
-
-            g.setColor(
-                    new Color(10, 30, 48, 215)
-            );
-            g.fillRoundRect(500, 669, 580, 34, 12, 12);
+            g.setColor(new Color(10, 30, 48, 215));
+            g.fillRoundRect(20, 669, 250, 34, 12, 12);
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 13));
+            g.drawString("ENTER: Start    N: Restart", 35, 690);
+        } else if (stage == MARS || stage == EXPLORE
+                || ((stage == WIN || stage == LOSE) && reachedMars)) {
+            // The resource report occupies x=20..300, so these two panels
+            // sit alongside it without covering the Martian ground.
+            g.setColor(new Color(10, 30, 48, 215));
+            g.fillRoundRect(315, 113, 495, 32, 12, 12);
+            g.fillRoundRect(820, 113, 260, 32, 12, 12);
 
             g.setColor(Color.WHITE);
-            g.drawString(
-                    "Active: " + active.getName() + " (" + role + ")   Photos: "
-                            + photographer.getPhotosTaken() + stateText,
-                    518,
-                    690
-            );
+            g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            String controls = stage == EXPLORE
+                    ? "ARROWS: Move   SPACE: Jump   Q: Switch   P: Photo   N: Restart"
+                    : "MARS LANDED   N: Restart";
+            g.drawString(controls, 328, 134);
+
+            Astronaut active = activeAstronaut();
+            String role = active == engineer ? "Engineer" : "Photographer";
+            String status = "Active: " + active.getName() + " (" + role + ")"
+                    + "   Photos: " + photographer.getPhotosTaken();
+            g.drawString(status, 832, 134);
         }
 
         g.translate(0, 14);

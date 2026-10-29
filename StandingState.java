@@ -1,7 +1,8 @@
 public class StandingState implements MovementState {
     @Override
-    public void update(SurfaceWalker walker, boolean left, boolean right) {
-        if (left != right) {
+    public void update(SurfaceWalker walker, boolean up, boolean down,
+                       boolean left, boolean right) {
+        if (left != right || up != down) {
             walker.toWalking();
         }
     }
