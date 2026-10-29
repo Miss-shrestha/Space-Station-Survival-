@@ -23,7 +23,6 @@ public class SpaceMissionGame extends JPanel
     private static final int WIN = 6;
     private static final int LOSE = 7;
     private static final int EXPLORE = 8;      // walking on the Martian surface
-    private static final int FLAG_X = 1066;
 
     private int stage = READY;
     private int stageTimer = 0;
@@ -401,7 +400,7 @@ public class SpaceMissionGame extends JPanel
         reachedExplore = true;
         marsStepTimer = 0;
         walker.reset();
-        message = "Walk to the flag! SPACE jumps, P takes a photo, Q switches astronaut";
+        message = "Explore Mars! SPACE jumps, P takes a photo, Q switches astronaut";
     }
 
     private void updateExploration() {
@@ -416,12 +415,7 @@ public class SpaceMissionGame extends JPanel
             }
         }
 
-        if (stage == EXPLORE && walker.getX() >= SurfaceWalker.FLAG_REACHED_X) {
-            stage = WIN;
-            score = (int) (fuel + oxygen + energy + equipment)
-                    + photographer.getPhotosTaken() * 5;
-            message = "FLAG PLANTED! Mission score: " + score;
-        }
+
     }
 
     // Oxygen comes from the real Astronaut objects. walk() throws the custom
@@ -1513,18 +1507,6 @@ public class SpaceMissionGame extends JPanel
             g.fillOval((int) f.getX() - 7, (int) f.getY(), 14, 5);
         }
 
-        // Flag at the end of the exploration route
-        g.setColor(new Color(225, 228, 230));
-        g.setStroke(new BasicStroke(4));
-        g.drawLine(FLAG_X, 562, FLAG_X, 656);
-        g.setColor(new Color(210, 40, 45));
-        g.fillPolygon(new Polygon(
-                new int[]{FLAG_X, FLAG_X + 28, FLAG_X},
-                new int[]{564, 587, 610},
-                3
-        ));
-        g.setStroke(new BasicStroke(1));
-
         // Astronauts appear only after landing and a short pause
         if (marsLanded && marsExitTimer <= 0) {
             if (reachedExplore) {
@@ -1542,7 +1524,7 @@ public class SpaceMissionGame extends JPanel
             drawCentreMessage(
                     g,
                     "MISSION ACCOMPLISHED",
-                    "You planted the flag on Mars! Press N to play again"
+                    "Mission completed! Press N to play again"
             );
         } else if (stage == LOSE) {
             drawCentreMessage(
@@ -1852,7 +1834,7 @@ public class SpaceMissionGame extends JPanel
         );
 
         // Keep the galaxy clear of bottom instructions. On Mars, place compact
-        // controls below the top dashboard, away from feet, footprints and flag.
+        // controls below the top dashboard, away from feet and footprints.
         if (stage < SPACE) {
             g.setColor(new Color(10, 30, 48, 215));
             g.fillRoundRect(20, 669, 250, 34, 12, 12);
