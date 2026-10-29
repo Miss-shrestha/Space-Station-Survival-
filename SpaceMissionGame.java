@@ -1913,9 +1913,9 @@ if (marsLanded && marsExitTimer <= 0) {
         );
 
         g.fillRoundRect(
-                20,
+                45,
                 669,
-                250,
+                210,
                 34,
                 12,
                 12
@@ -1952,7 +1952,7 @@ if (marsLanded && marsExitTimer <= 0) {
 
         g.drawString(
                 controls,
-                35,
+                58,
                 690
         );
         g.translate(0, 14);
