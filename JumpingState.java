@@ -1,12 +1,17 @@
 public class JumpingState implements MovementState {
     @Override
-    public void update(SurfaceWalker walker, boolean left, boolean right) {
-        walker.applyLowGravity();                 // Mars gravity: floaty jump
-        if (left != right) {
-            walker.moveHorizontally(left ? -SurfaceWalker.WALK_SPEED : SurfaceWalker.WALK_SPEED);
+    public void update(SurfaceWalker walker, boolean up, boolean down,
+                       boolean left, boolean right) {
+        double dx = (right ? 1 : 0) - (left ? 1 : 0);
+        double dy = (down ? 1 : 0) - (up ? 1 : 0);
+        if (dx != 0 || dy != 0) {
+            double scale = SurfaceWalker.WALK_SPEED / Math.hypot(dx, dy);
+            walker.moveHorizontally(dx * scale);
+            walker.moveVertically(dy * scale);
         }
-        if (walker.isOnGround()) {                // landed: choose the next state
-            if (left != right) {
+        walker.applyLowGravity();
+        if (walker.isOnGround()) {
+            if (dx != 0 || dy != 0) {
                 walker.toWalking();
             } else {
                 walker.toStanding();
@@ -16,7 +21,7 @@ public class JumpingState implements MovementState {
 
     @Override
     public void jump(SurfaceWalker walker) {
-        // no double jumping while in the air
+        // No double jumping while airborne.
     }
 
     @Override

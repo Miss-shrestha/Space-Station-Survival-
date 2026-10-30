@@ -1,7 +1,7 @@
-// State pattern: each state decides how the walker behaves in that state
-// and when to change to a different state.
+// State pattern: each state controls movement and transitions.
 public interface MovementState {
-    void update(SurfaceWalker walker, boolean left, boolean right);
+    void update(SurfaceWalker walker, boolean up, boolean down,
+                boolean left, boolean right);
     void jump(SurfaceWalker walker);
     String getName();
 }
