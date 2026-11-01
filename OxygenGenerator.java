@@ -9,4 +9,9 @@ public class OxygenGenerator extends Equipment {
         checkWorking();
         System.out.println(name + " is producing oxygen.");
     }
+
+    public double generateOxygen() {
+    checkWorking();
+    return 0.003;
+}
 }

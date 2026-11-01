@@ -17,4 +17,8 @@ public class Camera extends Equipment {
     public int getPhotosTaken() {
         return photosTaken;
     }
+
+    public void resetPhotos() {
+    photosTaken = 0;
+}
 }

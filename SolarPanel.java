@@ -9,4 +9,9 @@ public class SolarPanel extends Equipment {
         checkWorking();
         System.out.println(name + " is generating energy.");
     }
+
+    public double generateEnergy() {
+    checkWorking();
+    return 0.002;
+    }
 }

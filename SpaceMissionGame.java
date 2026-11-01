@@ -33,6 +33,20 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private boolean equipmentBroken = false;
     private String message = "Press ENTER to begin the Mars mission";
 
+    private final SolarPanel solarPanel = new SolarPanel();
+    private final OxygenGenerator oxygenGenerator = new OxygenGenerator();
+    private final Camera camera = new Camera();
+
+    private Container<MarsSample> collectedSamples = new Container<>();
+
+    private final MarsSample[] marsSamples = {
+            new MarsSample("Basalt Rock"),
+            new MarsSample("Iron-Rich Soil"),
+            new MarsSample("Ice Deposit")
+    };
+
+    private int nextSample = 0;
+
     private final int[] starX = new int[90];
     private final int[] starY = new int[90];
     private final int[] asteroidX = new int[7];
@@ -81,9 +95,12 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         cloud1 += 0.35;
         cloud2 += 0.22;
         cloud3 += 0.28;
-        if (cloud1 > 1200) cloud1 = -170;
-        if (cloud2 > 1200) cloud2 = -170;
-        if (cloud3 > 1200) cloud3 = -170;
+        if (cloud1 > 1200)
+            cloud1 = -170;
+        if (cloud2 > 1200)
+            cloud2 = -170;
+        if (cloud3 > 1200)
+            cloud3 = -170;
 
         if (stage == BOARDING) {
             astronautX += 2.2;
@@ -95,7 +112,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             }
         } else if (stage == COUNTDOWN) {
             stageTimer--;
-            message = "Launch in " + Math.max(1, (int)Math.ceil(stageTimer / 60.0));
+            message = "Launch in " + Math.max(1, (int) Math.ceil(stageTimer / 60.0));
             if (stageTimer <= 0) {
                 stage = LAUNCHING;
                 message = "LIFTOFF!";
@@ -123,14 +140,29 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private void updateSpaceMission() {
         double speed = equipmentBroken ? 1.8 : 4.0;
 
-        if (up && rocketY > 95) rocketY -= speed;
-        if (down && rocketY < 640) rocketY += speed;
-        if (left && rocketX > 45) rocketX -= speed;
-        if (right && rocketX < 1030) rocketX += speed;
+        if (up && rocketY > 95)
+            rocketY -= speed;
+        if (down && rocketY < 640)
+            rocketY += speed;
+        if (left && rocketX > 45)
+            rocketX -= speed;
+        if (right && rocketX < 1030)
+            rocketX += speed;
 
-        if (up || down || left || right) fuel -= 0.025;
-        oxygen -= 0.006;
-        energy -= 0.004;
+        if (up || down || left || right)
+            fuel -= 0.025;
+        try {
+    oxygen -= 0.006;
+    oxygen += oxygenGenerator.generateOxygen();
+
+    energy -= 0.004;
+    energy += solarPanel.generateEnergy();
+
+    oxygen = Math.min(100, oxygen);
+    energy = Math.min(100, energy);
+} catch (MissionException e) {
+    message = e.getMessage();
+}
 
         if (!equipmentBroken && random.nextInt(2400) == 0) {
             equipmentBroken = true;
@@ -156,7 +188,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
 
         if (rocketX > 940) {
             stage = WIN;
-            score = (int)(fuel + oxygen + energy + equipment);
+            score = (int) (fuel + oxygen + energy + equipment);
             message = "MARS REACHED! Mission score: " + score;
         }
     }
@@ -192,9 +224,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
 
         g.setColor(new Color(255, 220, 65));
         g.fillOval(900, 60, 80, 80);
-        drawCloud(g, (int)cloud1, 115, 1.0);
-        drawCloud(g, (int)cloud2, 185, 0.7);
-        drawCloud(g, (int)cloud3, 105, 0.9);
+        drawCloud(g, (int) cloud1, 115, 1.0);
+        drawCloud(g, (int) cloud2, 185, 0.7);
+        drawCloud(g, (int) cloud3, 105, 0.9);
 
         g.setColor(new Color(76, 167, 105));
         g.fillOval(-150, 390, 520, 180);
@@ -208,19 +240,21 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         drawLaunchPad(g);
         drawLaunchTower(g);
 
-        if (stage != SPACE) drawRocket(g, rocketX, rocketY, stage >= COUNTDOWN);
-        if (stage == READY || stage == BOARDING) drawAstronaut(g, astronautX, astronautY);
+        if (stage != SPACE)
+            drawRocket(g, rocketX, rocketY, stage >= COUNTDOWN);
+        if (stage == READY || stage == BOARDING)
+            drawAstronaut(g, astronautX, astronautY);
     }
 
     private void drawCloud(Graphics2D g, int x, int y, double size) {
         g.setColor(new Color(255, 255, 255, 235));
-        g.fillOval(x, y, (int)(130 * size), (int)(45 * size));
-        g.fillOval((int)(x - 38 * size), (int)(y + 7 * size),
-                (int)(75 * size), (int)(40 * size));
-        g.fillOval((int)(x + 40 * size), (int)(y + 7 * size),
-                (int)(78 * size), (int)(42 * size));
-        g.fillOval((int)(x - 10 * size), (int)(y - 25 * size),
-                (int)(70 * size), (int)(62 * size));
+        g.fillOval(x, y, (int) (130 * size), (int) (45 * size));
+        g.fillOval((int) (x - 38 * size), (int) (y + 7 * size),
+                (int) (75 * size), (int) (40 * size));
+        g.fillOval((int) (x + 40 * size), (int) (y + 7 * size),
+                (int) (78 * size), (int) (42 * size));
+        g.fillOval((int) (x - 10 * size), (int) (y - 25 * size),
+                (int) (70 * size), (int) (62 * size));
     }
 
     private void drawControlRoom(Graphics2D g) {
@@ -250,15 +284,16 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     private void drawFence(Graphics2D g) {
         g.setColor(new Color(190, 200, 200));
         g.setStroke(new BasicStroke(2));
-        for (int x = 0; x < 1100; x += 45) g.drawLine(x, 475, x, 535);
+        for (int x = 0; x < 1100; x += 45)
+            g.drawLine(x, 475, x, 535);
         g.drawLine(0, 490, 1100, 490);
         g.drawLine(0, 520, 1100, 520);
     }
 
     private void drawLaunchPad(Graphics2D g) {
         g.setColor(new Color(92, 98, 103));
-        Polygon pad = new Polygon(new int[]{590, 965, 1060, 485},
-                new int[]{555, 555, 700, 700}, 4);
+        Polygon pad = new Polygon(new int[] { 590, 965, 1060, 485 },
+                new int[] { 555, 555, 700, 700 }, 4);
         g.fillPolygon(pad);
         g.setColor(new Color(175, 181, 184));
         g.fillOval(620, 520, 330, 80);
@@ -283,38 +318,38 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     }
 
     private void drawRocket(Graphics2D g, double x, double y, boolean fire) {
-        int rx = (int)x;
-        int ry = (int)y;
+        int rx = (int) x;
+        int ry = (int) y;
 
         g.setColor(new Color(230, 235, 238));
         g.fillRoundRect(rx - 40, ry - 220, 80, 210, 20, 20);
-        Polygon nose = new Polygon(new int[]{rx - 40, rx, rx + 40},
-                new int[]{ry - 210, ry - 295, ry - 210}, 3);
+        Polygon nose = new Polygon(new int[] { rx - 40, rx, rx + 40 },
+                new int[] { ry - 210, ry - 295, ry - 210 }, 3);
         g.fillPolygon(nose);
         g.setColor(new Color(45, 155, 210));
         g.fillOval(rx - 24, ry - 175, 48, 48);
         g.setColor(new Color(195, 45, 50));
         g.fillRect(rx - 40, ry - 65, 80, 27);
-        g.fillPolygon(new Polygon(new int[]{rx - 40, rx - 76, rx - 40},
-                new int[]{ry - 70, ry, ry - 15}, 3));
-        g.fillPolygon(new Polygon(new int[]{rx + 40, rx + 76, rx + 40},
-                new int[]{ry - 70, ry, ry - 15}, 3));
+        g.fillPolygon(new Polygon(new int[] { rx - 40, rx - 76, rx - 40 },
+                new int[] { ry - 70, ry, ry - 15 }, 3));
+        g.fillPolygon(new Polygon(new int[] { rx + 40, rx + 76, rx + 40 },
+                new int[] { ry - 70, ry, ry - 15 }, 3));
 
         if (fire) {
             int flame = stage == LAUNCHING ? 135 : 75;
             g.setColor(new Color(255, 85, 15));
-            g.fillPolygon(new Polygon(new int[]{rx - 30, rx, rx + 30},
-                    new int[]{ry - 10, ry + flame, ry - 10}, 3));
+            g.fillPolygon(new Polygon(new int[] { rx - 30, rx, rx + 30 },
+                    new int[] { ry - 10, ry + flame, ry - 10 }, 3));
             g.setColor(new Color(255, 225, 70));
-            g.fillPolygon(new Polygon(new int[]{rx - 14, rx, rx + 14},
-                    new int[]{ry - 10, ry + flame - 35, ry - 10}, 3));
+            g.fillPolygon(new Polygon(new int[] { rx - 14, rx, rx + 14 },
+                    new int[] { ry - 10, ry + flame - 35, ry - 10 }, 3));
         }
     }
 
     private void drawAstronaut(Graphics2D g, double x, double y) {
-        int ax = (int)x;
-        int ay = (int)y;
-        int walk = stage == BOARDING ? (int)(Math.sin(System.currentTimeMillis() * 0.012) * 7) : 0;
+        int ax = (int) x;
+        int ay = (int) y;
+        int walk = stage == BOARDING ? (int) (Math.sin(System.currentTimeMillis() * 0.012) * 7) : 0;
 
         g.setColor(new Color(245, 247, 248));
         g.fillRoundRect(ax - 17, ay - 48, 34, 55, 10, 10);
@@ -353,7 +388,7 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         }
 
         if (stage != WIN && stage != LOSE) {
-            drawSpaceRocket(g, (int)rocketX, (int)rocketY);
+            drawSpaceRocket(g, (int) rocketX, (int) rocketY);
         }
 
         if (stage == WIN) {
@@ -367,13 +402,13 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.setColor(new Color(225, 232, 235));
         g.fillOval(x - 35, y - 20, 75, 40);
         g.setColor(new Color(195, 45, 50));
-        g.fillPolygon(new Polygon(new int[]{x - 25, x - 50, x - 25},
-                new int[]{y - 15, y - 35, y}, 3));
+        g.fillPolygon(new Polygon(new int[] { x - 25, x - 50, x - 25 },
+                new int[] { y - 15, y - 35, y }, 3));
         g.setColor(new Color(55, 165, 215));
         g.fillOval(x + 5, y - 12, 22, 22);
         g.setColor(new Color(255, 155, 25));
-        g.fillPolygon(new Polygon(new int[]{x - 35, x - 70, x - 35},
-                new int[]{y - 11, y, y + 11}, 3));
+        g.fillPolygon(new Polygon(new int[] { x - 35, x - 70, x - 35 },
+                new int[] { y - 11, y, y + 11 }, 3));
     }
 
     private void drawDashboard(Graphics2D g) {
@@ -391,13 +426,15 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         drawBar(g, 905, 35, "EQUIPMENT", equipment, new Color(205, 125, 230));
 
         g.setColor(new Color(10, 30, 48, 215));
-        g.fillRoundRect(20, 640, 470, 42, 12, 12);
+        g.fillRoundRect(20, 640, 1060, 42, 12, 12);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.PLAIN, 13));
         String controls = stage < SPACE
                 ? "ENTER: Start     N: Restart"
-                : "ARROW KEYS: Fly     R: Repair     N: Restart";
-        g.drawString(controls, 38, 666);
+                : "ARROWS: Fly   R: Repair   P: Photo   C: Collect   N: Restart";        
+                g.drawString(controls, 38, 666);
+                g.drawString("Photos: " + camera.getPhotosTaken()
+                   + "     Mars Samples: " + collectedSamples.size() + "/3", 720, 666);
     }
 
     private void drawBar(Graphics2D g, int x, int y, String label, double value, Color colour) {
@@ -408,9 +445,9 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         g.setColor(new Color(55, 70, 80));
         g.fillRoundRect(x, y, 145, 14, 8, 8);
         g.setColor(colour);
-        g.fillRoundRect(x, y, (int)(145 * value / 100), 14, 8, 8);
+        g.fillRoundRect(x, y, (int) (145 * value / 100), 14, 8, 8);
         g.setColor(Color.WHITE);
-        g.drawString((int)value + "%", x + 55, y + 12);
+        g.drawString((int) value + "%", x + 55, y + 12);
     }
 
     private void drawCentreMessage(Graphics2D g, String title, String subtitle) {
@@ -438,6 +475,13 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
         energy = 100;
         equipment = 100;
         equipmentBroken = false;
+        solarPanel.repair();
+        oxygenGenerator.repair();
+        camera.repair();
+        camera.resetPhotos();
+
+        collectedSamples = new Container<>();
+        nextSample = 0;
         message = "Press ENTER to begin the Mars mission";
         resetAsteroids();
     }
@@ -445,11 +489,16 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
     @Override
     public void keyPressed(KeyEvent event) {
         int key = event.getKeyCode();
-        if (key == KeyEvent.VK_ENTER && stage == READY) stage = BOARDING;
-        if (key == KeyEvent.VK_UP) up = true;
-        if (key == KeyEvent.VK_DOWN) down = true;
-        if (key == KeyEvent.VK_LEFT) left = true;
-        if (key == KeyEvent.VK_RIGHT) right = true;
+        if (key == KeyEvent.VK_ENTER && stage == READY)
+            stage = BOARDING;
+        if (key == KeyEvent.VK_UP)
+            up = true;
+        if (key == KeyEvent.VK_DOWN)
+            down = true;
+        if (key == KeyEvent.VK_LEFT)
+            left = true;
+        if (key == KeyEvent.VK_RIGHT)
+            right = true;
 
         if (key == KeyEvent.VK_R && stage == SPACE && equipmentBroken) {
             if (energy >= 15) {
@@ -462,16 +511,40 @@ public class SpaceMissionGame extends JPanel implements ActionListener, KeyListe
             }
         }
 
-        if (key == KeyEvent.VK_N) restartGame();
+          if (key == KeyEvent.VK_P && stage >= SPACE) {
+            try {
+                camera.operate();
+                message = "Photo taken! Total photos: " + camera.getPhotosTaken();
+            } catch (MissionException e) {
+                message = e.getMessage();
+            }
+        }
+
+        if (key == KeyEvent.VK_C && stage == WIN) {
+            if (nextSample < marsSamples.length) {
+                collectedSamples.add(marsSamples[nextSample]);
+                message = "Collected: " + marsSamples[nextSample].getName();
+                nextSample++;
+            } else {
+                message = "All 3 Mars samples collected!";
+            }
+        }
+
+        if (key == KeyEvent.VK_N)
+            restartGame();
     }
 
     @Override
     public void keyReleased(KeyEvent event) {
         int key = event.getKeyCode();
-        if (key == KeyEvent.VK_UP) up = false;
-        if (key == KeyEvent.VK_DOWN) down = false;
-        if (key == KeyEvent.VK_LEFT) left = false;
-        if (key == KeyEvent.VK_RIGHT) right = false;
+        if (key == KeyEvent.VK_UP)
+            up = false;
+        if (key == KeyEvent.VK_DOWN)
+            down = false;
+        if (key == KeyEvent.VK_LEFT)
+            left = false;
+        if (key == KeyEvent.VK_RIGHT)
+            right = false;
     }
 
     @Override
