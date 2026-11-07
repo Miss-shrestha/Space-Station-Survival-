@@ -116,7 +116,18 @@ private final MarsSample[] marsSamples = {
         new MarsSample("Ice Deposit")
 };
 
-private int nextSample = 0;
+
+// Three hidden Mars sample locations
+private static final int[] SAMPLE_X = {880, 500, 255};
+private static final int[] SAMPLE_Y = {602, 568, 615};
+
+// Track collected samples and who is holding them
+private final boolean[] sampleCollected = new boolean[3];
+private final int[] sampleCarrier = {-1, -1, -1};
+
+private int samplePickupPulse = 0;
+private int lastPickedSample = -1;
+
 
 private int activeIndex = 0;
 private int walkTimer = 0;
@@ -427,6 +438,33 @@ private int walkTimer = 0;
 
     private void updateExploration() {
         walker.update(up, down, left, right);
+
+        
+        // Automatically collect samples at hidden locations
+        double astronautX = walker.getX() + activeIndex * 62;
+        double astronautY = walker.getY();
+
+        for (int i = 0; i < marsSamples.length; i++) {
+            if (!sampleCollected[i]
+                    && Math.abs(astronautX - SAMPLE_X[i]) <= 46
+                    && Math.abs(astronautY - SAMPLE_Y[i]) <= 58) {
+
+                sampleCollected[i] = true;
+                sampleCarrier[i] = activeIndex;
+                collectedSamples.add(marsSamples[i]);
+
+                lastPickedSample = i;
+                samplePickupPulse = 45;
+
+                message = "Collected: " + marsSamples[i].getName();
+                break;
+            }
+        }
+
+        if (samplePickupPulse > 0) {
+            samplePickupPulse--;
+        }
+
 
         // Moving (walking or jumping) uses oxygen; standing still does not
         if (walker.isMoving()) {
@@ -1132,6 +1170,20 @@ private String getTravelModeName() {
             );
         }
 
+       
+        // Show collected gemstones in astronauts' hands
+        if (stage == EXPLORE) {
+            if (sampleCollected[0]) {
+                drawSampleGem(g, 0, startX - 29, ay - 11, 8);
+            }
+            if (sampleCollected[1]) {
+                drawSampleGem(g, 1, startX + 91, ay - 11, 8);
+            }
+            if (sampleCollected[2]) {
+                drawSampleGem(g, 2, startX - 29, ay - 24, 8);
+            }
+        }
+
         g.setStroke(new BasicStroke(1));
     }
 
@@ -1607,6 +1659,16 @@ private String getTravelModeName() {
             g.fillOval((int) f.getX() - 7, (int) f.getY(), 14, 5);
         }
 
+        
+        // Display the three Mars samples at their hidden locations
+        if (stage == EXPLORE) {
+            for (int i = 0; i < 3; i++) {
+                if (!sampleCollected[i]) {
+                    drawSampleGem(g, i, SAMPLE_X[i], SAMPLE_Y[i], 12);
+                }
+            }
+        }
+
         // Astronauts appear only after landing and a short pause
         if (marsLanded && marsExitTimer <= 0) {
             if (reachedExplore) {
@@ -1868,7 +1930,7 @@ private String getTravelModeName() {
             return "UP: Slow down   DOWN: Speed up   N: Restart";
         }
         if (stage == EXPLORE) {
-            return "ARROWS: Move   SPACE: Jump   Q: Switch   P: Photo   C: Sample   R: Repair   N: Restart";
+            return "ARROWS: Move   SPACE: Jump   Q: Switch   P: Photo   N: Restart   (walk over gems to collect samples)";
         }
         return "N: Restart";
     }
@@ -1917,7 +1979,9 @@ private String getTravelModeName() {
         g.drawString(message, 42, 74);
 
         // Controls for the current stage, in the top bar under the resources
-        String controls = getControlsText();
+        String controls = (stage == MARS || stage == EXPLORE)
+        ? "Move astronauts to collect samples."
+        : getControlsText();
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
         g.setColor(new Color(190, 215, 230));
         FontMetrics controlMetrics = g.getFontMetrics();
@@ -2176,6 +2240,53 @@ if (emergencyActive) {
         );
     }
 
+    
+private void drawSampleGem(Graphics2D g, int type, int x, int y, int size) {
+    Graphics2D gem = (Graphics2D) g.create();
+
+    if (type == 0) {
+        // Turquoise: glowing round gemstone
+        gem.setColor(new Color(50, 235, 210, 80));
+        gem.fillOval(x - size, y - size, size * 2, size * 2);
+        gem.setColor(new Color(25, 210, 195));
+        gem.fillOval(x - size / 2, y - size / 2, size, size);
+        gem.setColor(new Color(180, 255, 245));
+        gem.fillOval(x - size / 4, y - size / 3,
+                Math.max(2, size / 3), Math.max(2, size / 3));
+
+    } else if (type == 1) {
+        // Sapphire: deep blue diamond
+        int[] xs = {x, x + size / 2, x, x - size / 2};
+        int[] ys = {y - size, y, y + size, y};
+        gem.setColor(new Color(35, 100, 255));
+        gem.fillPolygon(xs, ys, 4);
+        gem.setColor(new Color(155, 215, 255));
+        gem.drawPolygon(xs, ys, 4);
+        gem.drawLine(x, y - size, x, y + size);
+
+    } else {
+        // Crystal: sparkling pale violet crystal
+        int[] xs = {x, x + size / 2, x + size / 3,
+                    x, x - size / 3, x - size / 2};
+        int[] ys = {y - size, y - size / 3, y + size,
+                    y + size / 2, y + size, y - size / 3};
+        gem.setColor(new Color(190, 155, 255));
+        gem.fillPolygon(xs, ys, 6);
+        gem.setColor(Color.WHITE);
+        gem.drawPolygon(xs, ys, 6);
+        gem.drawLine(x, y - size, x, y + size / 2);
+    }
+
+    // Tiny glittering sparkles
+    gem.setColor(new Color(255, 255, 255, 220));
+    gem.drawLine(x + size / 2, y - size, x + size / 2, y - size - 5);
+    gem.drawLine(x + size / 2 - 2, y - size - 2,
+                 x + size / 2 + 2, y - size - 2);
+    gem.fillOval(x - size, y - size, 2, 2);
+
+    gem.dispose();
+}
+
     private void restartGame() {
         resourceHistory.clear();
         resourceSampleTimer = 0;
@@ -2230,7 +2341,12 @@ oxygenGenerator = new OxygenGenerator();
 camera = new Camera();
 
 collectedSamples = new Container<>();
-nextSample = 0;
+for (int i = 0; i < sampleCollected.length; i++) {
+    sampleCollected[i] = false;
+    sampleCarrier[i] = -1;
+}
+samplePickupPulse = 0;
+lastPickedSample = -1;
 
 resetAsteroids();
     }
@@ -2373,9 +2489,17 @@ camera.repair(35);
                         + " (Q) to take photos";
 
             } else if (energy >= 2) {
-                energy -= 2;
 
-                String subject;
+    try {
+        camera.operate();
+    } catch (MissionException e) {
+        message = e.getMessage();
+        return;
+    }
+
+    energy -= 2;
+
+    String subject;
                 int photoX;
                 int photoY;
 
@@ -2384,9 +2508,11 @@ camera.repair(35);
                     photoX = (int) walker.getX();
                     photoY = (int) walker.getY();
                 } else {
-                    boolean nearby = asteroids.stream().anyMatch(a -> Math.abs(a.getX() - rocketX) < 250);
-                    subject = nearby
-                    ? "an asteroid field" : "deep space";
+                    List<Asteroid> nearby = asteroids.stream()
+                            .filter(a -> Math.abs(a.getX() - rocketX) < 250)
+                            .collect(Collectors.toList());
+                    subject = nearby.isEmpty()
+                            ? "deep space" : "an asteroid field";
                     photoX = (int) rocketX;
                     photoY = (int) rocketY;
                 }
@@ -2400,16 +2526,10 @@ camera.repair(35);
             }
         }
 
-        // C: collect Mars samples
-if (pressedKey == KeyEvent.VK_C && stage == EXPLORE) {
-    if (nextSample < marsSamples.length) {
-        collectedSamples.add(marsSamples[nextSample]);
-        message = "Collected: " + marsSamples[nextSample].getName();
-        nextSample++;
-    } else {
-        message = "All 3 Mars samples collected!";
-    }
-}
+       
+        // Mars samples are collected automatically
+        // when an astronaut reaches their location.
+
 
         if (pressedKey == KeyEvent.VK_N) {
             restartGame();
