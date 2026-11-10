@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -5,7 +6,10 @@ import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.DoubleSupplier;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import javax.swing.*;
 
 public class SpaceMissionGame extends JPanel
@@ -14,6 +18,11 @@ public class SpaceMissionGame extends JPanel
     private final Timer timer = new Timer(16, this);
     private final Random random = new Random();
 
+    // ================================================================
+    // ARUNIMA - WEEK 8: STATE-BASED MISSION FLOW
+    // The current stage determines which mission behaviour is active.
+    // This prevents launch, space flight and exploration running together.
+    // ================================================================
     private static final int READY = 0;
     private static final int BOARDING = 1;
     private static final int COUNTDOWN = 2;
@@ -24,6 +33,9 @@ public class SpaceMissionGame extends JPanel
     private static final int LOSE = 7;
     private static final int EXPLORE = 8;      // walking on the Martian surface
 
+    // ================================================================
+    // AAYUSH - SPACECRAFT TRAVEL AND LANDING SYSTEMS
+    // ================================================================
     private static final int ECO_MODE = 0;
     private static final int NORMAL_MODE = 1;
     private static final int BOOST_MODE = 2;
@@ -46,7 +58,10 @@ public class SpaceMissionGame extends JPanel
     private double energy = 100;
     private double equipment = 100;
 
-    // Mission Resource Report
+    // ================================================================
+    // NIMESH - WEEK 11: COLLECTORS AND RESOURCE ANALYSIS
+    // A snapshot of all four resources is recorded about once per second.
+    // ================================================================
     private final List<ResourceReading> resourceHistory =
             new ArrayList<>();
 
@@ -104,6 +119,11 @@ private static final double EMERGENCY_TRIGGER_X = 450;
    private Engineer engineer;
 private Photographer photographer;
 
+// ================================================================
+// SSROAT - EQUIPMENT, GENERIC STORAGE AND MISSION RESOURCES
+// Equipment subclasses provide damage/repair/operation behaviour.
+// Container<MarsSample> stores collected sample objects type-safely.
+// ================================================================
 private SolarPanel panel = new SolarPanel();
 private OxygenGenerator oxygenGenerator = new OxygenGenerator();
 private Camera camera = new Camera();
@@ -132,11 +152,25 @@ private int lastPickedSample = -1;
 private int activeIndex = 0;
 private int walkTimer = 0;
 
-    // Mars exploration: the State pattern context lives in SurfaceWalker
+    // ================================================================
+    // NIMESH - WEEK 8: FORMAL STATE DESIGN PATTERN
+    // SurfaceWalker is the context. Its Standing, Walking and Jumping
+    // states change movement behaviour without changing this game class.
+    // ================================================================
     private final SurfaceWalker walker = new SurfaceWalker();
     private boolean reachedMars = false;
     private boolean reachedExplore = false;
     private int marsStepTimer = 0;
+
+    // ================================================================
+    // AAYUSH - WEEK 9: BEHAVIOUR PARAMETERISATION
+    // This lambda supplies the current rocket-speed behaviour. The result
+    // depends on the selected travel mode and equipment condition.
+    // ================================================================
+    private final DoubleSupplier rocketSpeedSupplier =
+            () -> equipmentBroken
+                    ? getModeSpeed() * 0.45
+                    : getModeSpeed();
 
     public SpaceMissionGame() {
         setPreferredSize(new Dimension(1100, 700));
@@ -153,6 +187,8 @@ private int walkTimer = 0;
         timer.start();
     }
 
+    // ARUNIMA - WEEK 9: a Runnable lambda supplies the behaviour that
+    // Swing executes safely on its Event Dispatch Thread.
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame window =
@@ -182,7 +218,10 @@ private int walkTimer = 0;
     }
 
     // ============================================
-    // RESOURCE REPORT - STREAMS AND COLLECTORS
+    // ================================================================
+    // NIMESH - WEEK 11: STREAMS AND COMPOSED COLLECTORS
+    // groupingBy groups readings by resource name. The downstream
+    // summarizingDouble collector calculates count, sum, min, max and mean.
     // ============================================
 
     private void collectResourceReadings() {
@@ -207,7 +246,7 @@ private int walkTimer = 0;
     private Map<String, DoubleSummaryStatistics>
             createResourceReport() {
 
-        return resourceHistory.parallelStream()
+        return resourceHistory.stream()
                 .collect(
                         Collectors.groupingBy(
                                 ResourceReading::getResourceName,
@@ -440,29 +479,46 @@ private int walkTimer = 0;
         walker.update(up, down, left, right);
 
         
-        // Automatically collect samples at hidden locations
+        // ============================================================
+        // SSROAT + NIMESH - WEEK 10: SAMPLE SEARCH STREAM
+        // The primitive stream filters uncollected samples by distance and
+        // returns the first sample reached by the active astronaut.
+        // ============================================================
         double astronautX = walker.getX() + activeIndex * 62;
         double astronautY = walker.getY();
 
-        for (int i = 0; i < marsSamples.length; i++) {
-            if (!sampleCollected[i]
-                    && Math.abs(astronautX - SAMPLE_X[i]) <= 46
-                    && Math.abs(astronautY - SAMPLE_Y[i]) <= 58) {
+        int reachedSample = IntStream.range(0, marsSamples.length)
+                .filter(i -> !sampleCollected[i])
+                .filter(i -> Math.abs(astronautX - SAMPLE_X[i]) <= 46)
+                .filter(i -> Math.abs(astronautY - SAMPLE_Y[i]) <= 58)
+                .findFirst()
+                .orElse(-1);
 
-                sampleCollected[i] = true;
-                sampleCarrier[i] = activeIndex;
-                collectedSamples.add(marsSamples[i]);
+        if (reachedSample >= 0) {
+            sampleCollected[reachedSample] = true;
+            sampleCarrier[reachedSample] = activeIndex;
+            collectedSamples.add(marsSamples[reachedSample]);
 
-                lastPickedSample = i;
-                samplePickupPulse = 45;
+            lastPickedSample = reachedSample;
+            samplePickupPulse = 45;
 
-                message = "Collected: " + marsSamples[i].getName();
-                break;
-            }
+            message = "Collected: " + marsSamples[reachedSample].getName();
         }
 
         if (samplePickupPulse > 0) {
             samplePickupPulse--;
+        }
+
+        // ARUNIMA - mission outcome: two samples and two photographs
+        // complete the exploration and raise the victory flag.
+        if (collectedSamples.size() >= 3
+                && photographer.getPhotosTaken() >= 3) {
+            stage = WIN;
+            up = false;
+            down = false;
+            left = false;
+            right = false;
+            message = "MISSION ACCOMPLISHED - Victory flag raised!";
         }
 
 
@@ -493,8 +549,8 @@ private int walkTimer = 0;
     }
 
     private void updateSpaceMission() {
-        double speed = getModeSpeed();
-        if (equipmentBroken) speed *= 0.45;
+        // AAYUSH - WEEK 9: execute the parameterised speed behaviour.
+        double speed = rocketSpeedSupplier.getAsDouble();
         boolean tryingToMove = up || down || left || right;
         currentRocketSpeed = tryingToMove && fuel > 0 ? speed : 0;
         if (tryingToMove && fuel <= 0) {
@@ -561,12 +617,21 @@ camera.damage(100);
         }
 
 
-        // Lambda: move every asteroid
+        // ARUNIMA - WEEK 9: Consumer-style lambda applies movement
+        // behaviour to every asteroid.
         asteroids.forEach(a -> a.move(random));
 
-        // Stream: find every asteroid hitting the rocket
-        List<Asteroid> collided = asteroids.stream()
-                .filter(a -> a.hits(rocketX, rocketY))
+        // ============================================================
+        // ARUNIMA - WEEK 12: THREAD-SAFE PARALLEL COLLISION CHECK
+        // The rocket coordinates are copied before parallel work. Every
+        // task only reads one asteroid and writes no shared game resource.
+        // Equipment, energy and respawning are updated sequentially below.
+        // ============================================================
+        final double currentX = rocketX;
+        final double currentY = rocketY;
+
+        List<Asteroid> collided = asteroids.parallelStream()
+                .filter(a -> a.hits(currentX, currentY))
                 .collect(Collectors.toList());
 
         for (Asteroid a : collided) {
@@ -595,12 +660,13 @@ camera.damage(100);
             left = false;
             right = false;
 
-            score = (int) (
-                    fuel
-                            + oxygen
-                            + energy
-                            + equipment
-            );
+            // AAYUSH - WEEK 10: primitive stream plus terminal sum().
+            score = (int) DoubleStream.of(
+                    fuel,
+                    oxygen,
+                    energy,
+                    equipment
+            ).sum();
 
             message =
                     "Approaching the Mars landing site";
@@ -645,9 +711,11 @@ private String getTravelModeName() {
 }
     private void resetAsteroids() {
         asteroids.clear();
-        for (int i = 0; i < 10; i++) {
-            asteroids.add(new Asteroid(i, random));
-        }
+
+        // ARUNIMA - WEEK 10: IntStream is the source and forEach is the
+        // terminal operation that creates the ten asteroid objects.
+        IntStream.range(0, 10)
+                .forEach(i -> asteroids.add(new Asteroid(i, random)));
     }
 
     @Override
@@ -1683,10 +1751,11 @@ private String getTravelModeName() {
         }
 
         if (stage == WIN) {
+            drawVictoryFlag(g);
             drawCentreMessage(
                     g,
                     "MISSION ACCOMPLISHED",
-                    "Mission completed! Press N to play again"
+                    "3 samples and 3 photos completed! Press N to play again"
             );
         } else if (stage == LOSE) {
             drawCentreMessage(
@@ -1695,6 +1764,34 @@ private String getTravelModeName() {
                     "A resource reached zero. Press N to retry"
             );
         }
+    }
+
+    // ARUNIMA - visual outcome for completing the mission objectives.
+    private void drawVictoryFlag(Graphics2D g) {
+        int poleX = 555;
+        int poleTop = 390;
+        int poleBottom = 610;
+
+        g.setColor(new Color(215, 220, 225));
+        g.fillRoundRect(poleX, poleTop, 8, poleBottom - poleTop, 4, 4);
+
+        g.setColor(new Color(95, 55, 38));
+        g.fillOval(poleX - 8, poleBottom - 3, 24, 9);
+
+        Polygon flag = new Polygon(
+                new int[]{poleX + 8, poleX + 125, poleX + 105, poleX + 8},
+                new int[]{poleTop + 8, poleTop + 25, poleTop + 72, poleTop + 58},
+                4
+        );
+
+        g.setColor(new Color(40, 150, 75));
+        g.fillPolygon(flag);
+        g.setColor(Color.WHITE);
+        g.setStroke(new BasicStroke(3));
+        g.drawPolygon(flag);
+        g.setFont(new Font("SansSerif", Font.BOLD, 18));
+        g.drawString("VICTORY", poleX + 23, poleTop + 48);
+        g.setStroke(new BasicStroke(1));
     }
 
     private void drawMarsMoons(Graphics2D g) {
@@ -2480,6 +2577,9 @@ camera.repair(35);
             }
         }
 
+        // SSROAT - POLYMORPHIC CREW/EQUIPMENT INTERACTION:
+        // only Rain can photograph, and Camera.operate() may report a
+        // MissionException if damaged equipment is used.
         // P: only the Photographer can take photos
         if (pressedKey == KeyEvent.VK_P
                 && (stage == SPACE || stage == EXPLORE)) {
@@ -2562,3 +2662,6 @@ camera.repair(35);
     public void keyTyped(KeyEvent event) {
     }
 }
+
+
+
